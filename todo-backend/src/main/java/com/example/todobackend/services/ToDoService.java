@@ -3,7 +3,6 @@ package com.example.todobackend.services;
 import com.example.todobackend.entities.Priority;
 import com.example.todobackend.entities.Todo;
 import com.example.todobackend.repository.ToDoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -56,18 +55,12 @@ public class ToDoService implements IToDoService {
 
     @Override
     public List<Todo> getTodosByCompleted(boolean completed) {
-        return toDoRepository.findAll()
-                .stream()
-                .filter(todo -> todo.isCompleted() == completed)
-                .toList();
+        return toDoRepository.findByCompleted(completed);
     }
 
     @Override
     public List<Todo> getTodosByPriority(Priority priority) {
-        return toDoRepository.findAll()
-                .stream()
-                .filter(todo -> todo.getPriority() == priority)
-                .toList();
+        return toDoRepository.findByPriority(priority);
     }
 
     @Override
@@ -94,15 +87,5 @@ public class ToDoService implements IToDoService {
         }
 
         return null;
-    }
-
-    @Override
-    public List<Todo> getTodosByCompleted(boolean completed) {
-        return toDoRepository.findByCompleted(completed);
-    }
-
-    @Override
-    public List<Todo> getTodosByPriority(Priority priority) {
-        return toDoRepository.findByPriority(priority);
     }
 }

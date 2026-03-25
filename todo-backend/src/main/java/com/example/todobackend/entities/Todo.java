@@ -6,6 +6,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 
 import java.util.Date;
 
@@ -19,11 +21,23 @@ import java.util.Date;
 public class Todo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long idTodo;
+    Long idTodo;
     String title;
     String description;
     boolean completed;
     Priority priority;
     Date createdAt;
     Date updatedAt;
+
+    @PrePersist
+public void onCreate() {
+    Date now = new Date();
+    this.createdAt = now;
+    this.updatedAt = now;
+}
+
+@PreUpdate
+public void onUpdate() {
+    this.updatedAt = new Date();
+}
 }
