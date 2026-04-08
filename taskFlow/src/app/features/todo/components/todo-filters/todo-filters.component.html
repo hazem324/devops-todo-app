@@ -1,1 +1,23 @@
-<p>todo-filters works!</p>
+<div class="filters">
+
+  <!-- Status filters -->
+  <button
+    *ngFor="let f of statusFilters"
+    class="filter-btn"
+    [class.active]="activeFilter === f.value"
+    (click)="filterChange.emit(f.value)">
+    {{ f.label }}
+  </button>
+
+  <div class="filter-sep"></div>
+
+  <!-- Priority filters -->
+  <button
+    *ngFor="let f of priorityFilters"
+    class="filter-btn"
+    [class.active]="activeFilter === f.value"
+    (click)="filterChange.emit(f.value)">
+    {{ f.label }}
+  </button>
+
+</div>

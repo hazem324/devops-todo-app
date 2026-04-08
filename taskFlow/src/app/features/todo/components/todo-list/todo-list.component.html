@@ -1,1 +1,19 @@
-<p>todo-list works!</p>
+<!-- Empty state -->
+<div class="empty" *ngIf="todos.length === 0">
+  <div class="empty-icon">◻</div>
+  <p>No tasks found</p>
+</div>
+
+<!-- Task rows -->
+<div class="todo-list" *ngIf="todos.length > 0">
+  <app-todo-item
+    *ngFor="let todo of todos; trackBy: trackById"
+    [todo]="todo"
+    [isEditing]="editingId === todo.id"
+    (toggle)="toggle.emit($event)"
+    (delete)="delete.emit($event)"
+    (startEdit)="startEdit.emit($event)"
+    (save)="save.emit($event)"
+    (cancelEdit)="cancelEdit.emit()">
+  </app-todo-item>
+</div>

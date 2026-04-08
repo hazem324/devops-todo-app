@@ -8,6 +8,7 @@ import { TodoFormComponent } from './components/todo-form/todo-form.component';
 import { TodoFiltersComponent } from './components/todo-filters/todo-filters.component';
 import { TodoListComponent } from './components/todo-list/todo-list.component';
 import { TodoItemComponent } from './components/todo-item/todo-item.component';
+import { FormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -17,11 +18,12 @@ import { TodoItemComponent } from './components/todo-item/todo-item.component';
     TodoFormComponent,
     TodoFiltersComponent,
     TodoListComponent,
-    TodoItemComponent
+    TodoItemComponent,
   ],
   imports: [
     CommonModule,
-    TodoRoutingModule
+    TodoRoutingModule,
+    FormsModule
   ]
 })
 export class TodoModule { }

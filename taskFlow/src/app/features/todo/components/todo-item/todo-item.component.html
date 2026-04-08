@@ -1,1 +1,78 @@
-<p>todo-item works!</p>
+<div class="todo-item"
+     [ngClass]="[priorityClass, todo.completed ? 'done' : '']">
+
+  <!-- ── Checkbox ── -->
+  <label class="check-wrap">
+    <input
+      type="checkbox"
+      [checked]="todo.completed"
+      (change)="toggle.emit(todo.id)" />
+    <div class="check-box">
+      <svg class="check-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <polyline points="2,6 5,9 10,3" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </label>
+
+  <!-- ── Content ── -->
+  <div class="todo-content">
+
+    <!-- Edit mode -->
+    <input
+      *ngIf="isEditing"
+      #editInput
+      class="todo-title-edit"
+      [value]="todo.title"
+      (keydown.enter)="onSave(editInput.value)"
+      (keydown.escape)="cancelEdit.emit()" />
+
+    <!-- View mode -->
+    <div *ngIf="!isEditing" class="todo-title">{{ todo.title }}</div>
+
+    <!-- Meta row -->
+    <div class="todo-meta">
+      <span class="priority-tag" [ngClass]="badgeClass">{{ todo.priority }}</span>
+      <span class="todo-id">#{{ paddedId }}</span>
+    </div>
+
+  </div>
+
+  <!-- ── Actions ── -->
+  <div class="todo-actions">
+
+    <!-- Save (edit mode) -->
+    <button *ngIf="isEditing"
+      class="action-btn save"
+      title="Save"
+      (click)="onSave(editInput.value)">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <polyline points="2,7 6,11 12,3" stroke="currentColor"
+          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <!-- Edit (view mode) -->
+    <button *ngIf="!isEditing"
+      class="action-btn edit"
+      title="Edit"
+      (click)="startEdit.emit(todo.id)">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <path d="M9 1.5l2.5 2.5L4 11.5H1.5V9L9 1.5z"
+          stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <!-- Delete -->
+    <button class="action-btn delete"
+      title="Delete"
+      (click)="delete.emit(todo.id)">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <line x1="2" y1="2" x2="11" y2="11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="11" y1="2" x2="2" y2="11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+  </div>
+
+</div>

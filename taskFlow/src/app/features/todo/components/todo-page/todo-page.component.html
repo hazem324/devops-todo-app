@@ -1,7 +1,41 @@
-<div class="app">
+<div class="page">
 
-  <app-todo-header [stats]="stats"></app-todo-header>
+  <!-- ── Header ── -->
+  <app-todo-header
+    [total]="totalCount"
+    [done]="doneCount"
+    [pending]="pendingCount">
+  </app-todo-header>
 
- 
+  <!-- ── Add Form ── -->
+  <app-todo-form
+    (addTodo)="onAdd($event)">
+  </app-todo-form>
+
+  <!-- ── Filters ── -->
+  <app-todo-filters
+    [activeFilter]="activeFilter"
+    (filterChange)="activeFilter = $event">
+  </app-todo-filters>
+
+  <!-- ── List ── -->
+  <app-todo-list
+    [todos]="filteredTodos"
+    [editingId]="editingId"
+    (toggle)="onToggle($event)"
+    (delete)="onDelete($event)"
+    (startEdit)="editingId = $event"
+    (save)="onSave($event)"
+    (cancelEdit)="editingId = null">
+  </app-todo-list>
+
+  <!-- ── Footer ── -->
+  <div class="footer-bar">
+    <span>GET /todos → {{ filteredTodos.length }} result(s)</span>
+    <button class="clear-btn" (click)="clearCompleted()">Clear Completed</button>
+  </div>
 
 </div>
+
+<!-- ── Toast ── -->
+<div class="toast" [class.show]="toastVisible">{{ toastMessage }}</div>

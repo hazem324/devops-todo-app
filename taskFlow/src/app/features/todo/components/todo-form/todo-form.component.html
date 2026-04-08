@@ -1,1 +1,31 @@
-<p>todo-form works!</p>
+<div class="add-form">
+
+  <div class="form-label">New Task — POST /todos</div>
+
+  <div class="form-row">
+
+    <!-- Text input -->
+    <div class="input-wrap">
+      <input
+        type="text"
+        [(ngModel)]="title"
+        placeholder="e.g. Learn Kubernetes, Fix auth bug…"
+        (keydown.enter)="submit()" />
+    </div>
+
+    <!-- Priority selector -->
+    <div class="priority-select">
+      <button
+        *ngFor="let p of priorities"
+        class="priority-btn"
+        [ngClass]="selectedPriority === p ? 'active-' + p.toLowerCase() : ''"
+        (click)="selectPriority(p)">
+        {{ p === 'MEDIUM' ? 'MED' : p }}
+      </button>
+    </div>
+
+    <!-- Submit -->
+    <button class="add-btn" (click)="submit()">+ Add</button>
+
+  </div>
+</div>
