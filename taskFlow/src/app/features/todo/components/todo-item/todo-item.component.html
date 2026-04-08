@@ -41,11 +41,11 @@
   <!-- ── Actions ── -->
   <div class="todo-actions">
 
-    <!-- Save (edit mode) -->
+    <!-- Save (edit mode) — calls onSave() with no arg; TS uses ViewChild to read the input -->
     <button *ngIf="isEditing"
       class="action-btn save"
       title="Save"
-      (click)="onSave(editInput.value)">
+      (click)="onSave()">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
         <polyline points="2,7 6,11 12,3" stroke="currentColor"
           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>

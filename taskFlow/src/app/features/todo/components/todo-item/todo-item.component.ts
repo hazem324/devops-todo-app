@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { Todo } from '../../../../model/todo.model';
 
 @Component({
@@ -16,6 +16,8 @@ export class TodoItemComponent {
   @Output() save       = new EventEmitter<{ id: number; title: string }>();
   @Output() cancelEdit = new EventEmitter<void>();
 
+  @ViewChild('editInput') editInputRef!: ElementRef<HTMLInputElement>;
+
   get paddedId(): string {
     return this.todo.id.toString().padStart(3, '0');
   }
@@ -28,8 +30,9 @@ export class TodoItemComponent {
     return 'tag-' + this.todo.priority.toLowerCase();
   }
 
-  onSave(title: string): void {
-    const trimmed = title.trim();
+  onSave(title?: string): void {
+    const value   = title ?? this.editInputRef?.nativeElement?.value ?? '';
+    const trimmed = value.trim();
     if (trimmed) this.save.emit({ id: this.todo.id, title: trimmed });
   }
 }
