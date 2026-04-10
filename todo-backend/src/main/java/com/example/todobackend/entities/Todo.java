@@ -21,7 +21,7 @@ import java.util.Date;
 public class Todo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long idTodo;
+    Long id;
     String title;
     String description;
     boolean completed;
