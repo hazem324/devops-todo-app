@@ -21,10 +21,7 @@
   transition: all var(--transition);
 }
 
-.filter-btn:hover {
-  color: var(--text);
-  border-color: var(--muted);
-}
+.filter-btn:hover  { color: var(--text); border-color: var(--muted); }
 
 .filter-btn.active {
   background: var(--accent-dim);

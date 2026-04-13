@@ -5,7 +5,6 @@
   animation: fadeDown 0.5s 0.2s ease both;
 }
 
-/* Empty state */
 .empty {
   text-align: center;
   padding: 60px 20px;

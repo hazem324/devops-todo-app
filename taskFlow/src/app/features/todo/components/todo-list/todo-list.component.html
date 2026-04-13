@@ -10,10 +10,9 @@
     *ngFor="let todo of todos; trackBy: trackById"
     [todo]="todo"
     [isEditing]="editingId === todo.id"
-    (toggle)="toggle.emit($event)"
-    (delete)="delete.emit($event)"
     (startEdit)="startEdit.emit($event)"
-    (save)="save.emit($event)"
-    (cancelEdit)="cancelEdit.emit()">
+    (cancelEdit)="cancelEdit.emit()"
+    (todoUpdated)="todoUpdated.emit($event)"
+    (todoDeleted)="todoDeleted.emit($event)">
   </app-todo-item>
 </div>

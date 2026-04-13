@@ -8,6 +8,7 @@ import { TodoFormComponent } from './components/todo-form/todo-form.component';
 import { TodoFiltersComponent } from './components/todo-filters/todo-filters.component';
 import { TodoListComponent } from './components/todo-list/todo-list.component';
 import { TodoItemComponent } from './components/todo-item/todo-item.component';
+import { ToastComponent } from './components/toast/toast.component';
 import { FormsModule } from '@angular/forms';
 
 
@@ -19,6 +20,7 @@ import { FormsModule } from '@angular/forms';
     TodoFiltersComponent,
     TodoListComponent,
     TodoItemComponent,
+    ToastComponent
   ],
   imports: [
     CommonModule,

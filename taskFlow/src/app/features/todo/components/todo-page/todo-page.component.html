@@ -1,41 +1,49 @@
 <div class="page">
 
-  <!-- ── Header ── -->
+  <!-- Header: receives computed stats only -->
   <app-todo-header
     [total]="totalCount"
     [done]="doneCount"
     [pending]="pendingCount">
   </app-todo-header>
 
-  <!-- ── Add Form ── -->
+  <!-- Form: calls POST /todo internally, emits the created todo up -->
   <app-todo-form
-    (addTodo)="onAdd($event)">
+    (todoCreated)="onTodoCreated($event)">
   </app-todo-form>
 
-  <!-- ── Filters ── -->
+  <!-- Filters: calls GET /todo/completed/:bool or /todo/priority/:p internally -->
   <app-todo-filters
     [activeFilter]="activeFilter"
-    (filterChange)="activeFilter = $event">
+    (filterChange)="activeFilter = $event"
+    (filteredResults)="todos = $event">
   </app-todo-filters>
 
-  <!-- ── List ── -->
+  <!-- Loading -->
+  <div class="loading-bar" *ngIf="isLoading">
+    <div class="loading-bar__track">
+      <div class="loading-bar__fill"></div>
+    </div>
+    <span>Fetching tasks…</span>
+  </div>
+
+  <!-- List: passes editingId down, todo-item handles its own API calls -->
   <app-todo-list
+    *ngIf="!isLoading"
     [todos]="filteredTodos"
     [editingId]="editingId"
-    (toggle)="onToggle($event)"
-    (delete)="onDelete($event)"
     (startEdit)="editingId = $event"
-    (save)="onSave($event)"
-    (cancelEdit)="editingId = null">
+    (cancelEdit)="editingId = null"
+    (todoUpdated)="onTodoUpdated($event)"
+    (todoDeleted)="onTodoDeleted($event)">
   </app-todo-list>
 
-  <!-- ── Footer ── -->
-  <div class="footer-bar">
-    <span>GET /todos → {{ filteredTodos.length }} result(s)</span>
-    <button class="clear-btn" (click)="clearCompleted()">Clear Completed</button>
+  <!-- Footer -->
+  <div class="footer-bar" *ngIf="!isLoading">
+    <span>{{ filteredTodos.length }} task(s) shown</span>
   </div>
 
 </div>
 
-<!-- ── Toast ── -->
-<div class="toast" [class.show]="toastVisible">{{ toastMessage }}</div>
+<!-- Global toast: driven by ToastService, lives here once for whole feature -->
+<app-toast></app-toast>

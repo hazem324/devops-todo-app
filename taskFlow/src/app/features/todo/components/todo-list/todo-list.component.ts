@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Todo } from '../../../../model/todo.model';
+;
 
 @Component({
   selector: 'app-todo-list',
@@ -7,14 +8,15 @@ import { Todo } from '../../../../model/todo.model';
   styleUrls:   ['./todo-list.component.css']
 })
 export class TodoListComponent {
-  @Input()  todos:     Todo[]       = [];
+
+  @Input()  todos:     Todo[]        = [];
   @Input()  editingId: number | null = null;
 
-  @Output() toggle     = new EventEmitter<number>();
-  @Output() delete     = new EventEmitter<number>();
+  /* Bubbled up from todo-item → todo-list → todo-page */
   @Output() startEdit  = new EventEmitter<number>();
-  @Output() save       = new EventEmitter<{ id: number; title: string }>();
   @Output() cancelEdit = new EventEmitter<void>();
+  @Output() todoUpdated = new EventEmitter<Todo>();
+  @Output() todoDeleted = new EventEmitter<number>();
 
   trackById(_: number, todo: Todo): number {
     return todo.id;

@@ -1,0 +1,19 @@
+<div
+  class="toast"
+  *ngIf="toast"
+  [class.show]="visible"
+  [class.toast--success]="toast.type === 'success'"
+  [class.toast--error]="toast.type === 'error'"
+  [class.toast--info]="toast.type === 'info'">
+
+  <span class="toast__icon">
+    <ng-container [ngSwitch]="toast.type">
+      <span *ngSwitchCase="'success'">✓</span>
+      <span *ngSwitchCase="'error'">✕</span>
+      <span *ngSwitchCase="'info'">ℹ</span>
+    </ng-container>
+  </span>
+
+  <span class="toast__message">{{ toast.message }}</span>
+
+</div>

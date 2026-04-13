@@ -1,12 +1,12 @@
 <div class="todo-item"
-     [ngClass]="[priorityClass, todo.completed ? 'done' : '']">
+     [ngClass]="[priorityClass, todo.completed ? 'done' : '', isDeleting ? 'removing' : '']">
 
-  <!-- ── Checkbox ── -->
+  <!-- Checkbox → onToggle() -->
   <label class="check-wrap">
     <input
       type="checkbox"
       [checked]="todo.completed"
-      (change)="toggle.emit(todo.id)" />
+      (change)="onToggle()" />
     <div class="check-box">
       <svg class="check-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
         <polyline points="2,6 5,9 10,3" stroke="currentColor"
@@ -15,22 +15,25 @@
     </div>
   </label>
 
-  <!-- ── Content ── -->
+  <!-- Content -->
   <div class="todo-content">
 
-    <!-- Edit mode -->
-    <input
-      *ngIf="isEditing"
-      #editInput
-      class="todo-title-edit"
-      [value]="todo.title"
-      (keydown.enter)="onSave(editInput.value)"
-      (keydown.escape)="cancelEdit.emit()" />
+    <!-- Edit mode: #editInput stays in scope for Enter key -->
+    <ng-container *ngIf="isEditing; else viewMode">
+      <input
+        #editInput
+        class="todo-title-edit"
+        [value]="todo.title"
+        [disabled]="isSaving"
+        (input)="currentEditValue = editInput.value"
+        (keydown.enter)="onSave(editInput.value)"
+        (keydown.escape)="cancelEdit.emit()" />
+    </ng-container>
 
-    <!-- View mode -->
-    <div *ngIf="!isEditing" class="todo-title">{{ todo.title }}</div>
+    <ng-template #viewMode>
+      <div class="todo-title">{{ todo.title }}</div>
+    </ng-template>
 
-    <!-- Meta row -->
     <div class="todo-meta">
       <span class="priority-tag" [ngClass]="badgeClass">{{ todo.priority }}</span>
       <span class="todo-id">#{{ paddedId }}</span>
@@ -38,35 +41,31 @@
 
   </div>
 
-  <!-- ── Actions ── -->
+  <!-- Actions -->
   <div class="todo-actions">
 
-    <!-- Save (edit mode) — calls onSave() with no arg; TS uses ViewChild to read the input -->
-    <button *ngIf="isEditing"
-      class="action-btn save"
-      title="Save"
-      (click)="onSave()">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-        <polyline points="2,7 6,11 12,3" stroke="currentColor"
-          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
+    <!-- Save (edit mode) — uses ViewChild via onSave() with no arg -->
+    <ng-container *ngIf="isEditing; else editBtn">
+      <button class="action-btn save" [disabled]="isSaving" (click)="onSave()" title="Save">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <polyline points="2,7 6,11 12,3" stroke="currentColor"
+            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </ng-container>
 
     <!-- Edit (view mode) -->
-    <button *ngIf="!isEditing"
-      class="action-btn edit"
-      title="Edit"
-      (click)="startEdit.emit(todo.id)">
-      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-        <path d="M9 1.5l2.5 2.5L4 11.5H1.5V9L9 1.5z"
-          stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-      </svg>
-    </button>
+    <ng-template #editBtn>
+      <button class="action-btn edit" (click)="startEdit.emit(todo.id)" title="Edit">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M9 1.5l2.5 2.5L4 11.5H1.5V9L9 1.5z"
+            stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </ng-template>
 
     <!-- Delete -->
-    <button class="action-btn delete"
-      title="Delete"
-      (click)="delete.emit(todo.id)">
+    <button class="action-btn delete" [disabled]="isDeleting" (click)="onDelete()" title="Delete">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
         <line x1="2" y1="2" x2="11" y2="11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
         <line x1="11" y1="2" x2="2" y2="11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>

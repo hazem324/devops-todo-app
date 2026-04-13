@@ -12,7 +12,7 @@
   animation: slideIn 0.3s ease both;
 }
 
-/* ── left priority stripe ── */
+/* priority stripe */
 .todo-item::before {
   content: '';
   position: absolute;
@@ -27,19 +27,12 @@
 .todo-item.priority-medium::before { background: var(--medium); }
 .todo-item.priority-high::before   { background: var(--high);   }
 
-.todo-item:hover {
-  border-color: #3a3a48;
-  background: #1a1a22;
-  transform: translateX(2px);
-}
+.todo-item:hover { border-color: #3a3a48; background: #1a1a22; transform: translateX(2px); }
+.todo-item.done  { opacity: 0.55; }
+.todo-item.done .todo-title { text-decoration: line-through; color: var(--done-text); }
+.todo-item.removing { animation: popOut 0.25s ease forwards; }
 
-.todo-item.done            { opacity: 0.55; }
-.todo-item.done .todo-title {
-  text-decoration: line-through;
-  color: var(--done-text);
-}
-
-/* ── Checkbox ── */
+/* Checkbox */
 .check-wrap {
   flex-shrink: 0;
   width: 22px; height: 22px;
@@ -49,10 +42,8 @@
 
 .check-wrap input[type="checkbox"] {
   position: absolute;
-  opacity: 0;
-  width: 100%; height: 100%;
-  cursor: pointer;
-  margin: 0;
+  opacity: 0; width: 100%; height: 100%;
+  cursor: pointer; margin: 0;
 }
 
 .check-box {
@@ -60,35 +51,18 @@
   border: 1.5px solid var(--border);
   border-radius: 6px;
   background: var(--surface2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   transition: all var(--transition);
   pointer-events: none;
 }
 
-.check-wrap input:checked + .check-box {
-  background: var(--accent);
-  border-color: var(--accent);
-}
+.check-wrap input:checked + .check-box { background: var(--accent); border-color: var(--accent); }
 
-.check-icon {
-  opacity: 0;
-  transform: scale(0.5);
-  transition: all var(--transition);
-  color: #0e0e10;
-}
+.check-icon { opacity: 0; transform: scale(0.5); transition: all var(--transition); color: #0e0e10; }
+.check-wrap input:checked + .check-box .check-icon { opacity: 1; transform: scale(1); }
 
-.check-wrap input:checked + .check-box .check-icon {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* ── Content ── */
-.todo-content {
-  flex: 1;
-  min-width: 0;
-}
+/* Content */
+.todo-content { flex: 1; min-width: 0; }
 
 .todo-title {
   font-size: 0.95rem;
@@ -114,14 +88,10 @@
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
 
-.todo-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 4px;
-}
+.todo-title-edit:disabled { opacity: 0.6; }
 
-/* priority badge */
+.todo-meta { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+
 .priority-tag {
   font-family: 'DM Mono', monospace;
   font-size: 0.62rem;
@@ -136,14 +106,9 @@
 .tag-medium { background: var(--medium-bg); color: var(--medium); }
 .tag-high   { background: var(--high-bg);   color: var(--high);   }
 
-.todo-id {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.6rem;
-  color: #3a3a50;
-  letter-spacing: 0.04em;
-}
+.todo-id { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: #3a3a50; letter-spacing: 0.04em; }
 
-/* ── Actions ── */
+/* Actions */
 .todo-actions {
   display: flex;
   gap: 6px;
@@ -153,10 +118,7 @@
   transition: all var(--transition);
 }
 
-.todo-item:hover .todo-actions {
-  opacity: 1;
-  transform: translateX(0);
-}
+.todo-item:hover .todo-actions { opacity: 1; transform: translateX(0); }
 
 .action-btn {
   width: 34px; height: 34px;
@@ -164,14 +126,17 @@
   border: 1px solid var(--border);
   background: var(--surface2);
   color: var(--muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   transition: all var(--transition);
 }
 
-.action-btn:hover        { border-color: var(--muted); color: var(--text); background: #22222e; }
-.action-btn.edit:hover   { border-color: var(--accent); color: var(--accent); }
-.action-btn.delete:hover { border-color: var(--high);   color: var(--high);   background: var(--high-bg); }
-.action-btn.save         { border-color: var(--accent); color: var(--accent); }
+.action-btn:disabled      { opacity: 0.4; cursor: not-allowed; }
+.action-btn:hover         { border-color: var(--muted); color: var(--text); background: #22222e; }
+.action-btn.edit:hover    { border-color: var(--accent); color: var(--accent); }
+.action-btn.delete:hover  { border-color: var(--high);   color: var(--high);   background: var(--high-bg); }
+.action-btn.save          { border-color: var(--accent); color: var(--accent); }
+
+@keyframes popOut {
+  to { opacity: 0; transform: scale(0.92) translateX(20px); }
+}
