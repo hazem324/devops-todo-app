@@ -4,7 +4,7 @@ Pipeline {
         stage('hello'){
             steps{
                 echo 'hello jenkins'
-                echo 'first push'
+                echo 'first push '
             }
         }
     }
