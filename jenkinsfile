@@ -1,52 +1,58 @@
 pipeline {
     agent any 
+
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
     }
-    stages{
-        stage('checkout'){
-            steps{
-                git 'https://github.com/hazem324/devops-todo-app.git'
-            }
-        }
-         
-         stage('Build Containers'){
+
+    options {
+        timestamps()
+    }
+
+    stages {
+
+        stage('Build Containers'){
             steps{
                 sh 'docker compose -f $COMPOSE_FILE build'
             }
-         }
+        }
 
-         stage('Start Services'){
+        stage('Start Services'){
             steps{
                 sh 'docker compose -f $COMPOSE_FILE up -d'
             }
-         }
+        }
 
-         stage('Wait for Services') {
+        stage('Wait for Backend') {
             steps {
-                // wait for backend to be ready
-                sh 'sleep 20'
+                sh '''
+                for i in {1..12}; do
+                  curl -f http://localhost:8090/api && exit 0
+                  echo "Waiting for backend..."
+                  sleep 5
+                done
+                exit 1
+                '''
             }
         }
 
         stage('Test Backend API') {
             steps {
-                // Simple health check (adjust endpoint if needed)
-                sh 'curl --fail http://localhost:8090/api || exit 1'
+                sh 'curl --fail http://localhost:8090/api'
             }
         }
 
         stage('Test Frontend') {
             steps {
-                sh 'curl --fail http://localhost:4200 || exit 1'
+                sh 'curl --fail http://localhost:4200'
             }
         }
-     
-     }
+    }
 
     post {
         always {
-            sh 'docker-compose -f $COMPOSE_FILE down'
+            sh 'docker compose logs || true'
+            sh 'docker compose -f $COMPOSE_FILE down'
         }
     }
 }
