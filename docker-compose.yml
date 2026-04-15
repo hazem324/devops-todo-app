@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  front:
+    build:
+      context: ./taskFlow
+      dockerfile: Dockerfile
+    image: taskFlow:1.0
+    container_name: angular_app
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    
+  backend: 
+    build:
+      context: ./todo-backend
+      dockerfile: Dockerfile
+    image: backend:1.0
+    container_name: spring_app
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/todo?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      - db
+  
+  db:
+    image: mysql:8
+    container_name: mysql_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: todo
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
