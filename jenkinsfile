@@ -24,17 +24,22 @@ pipeline {
         }
 
         stage('Wait for Backend') {
-            steps {
-                sh '''
-                for i in {1..12}; do
-                  curl -f http://localhost:8090/api && exit 0
-                  echo "Waiting for backend..."
-                  sleep 5
-                done
-                exit 1
-                '''
-            }
-        }
+    steps {
+        sh '''
+        for i in {1..20}; do
+          echo "Checking backend..."
+          if curl -f http://localhost:8090/api; then
+            echo "Backend is ready "
+            exit 0
+          fi
+          echo "Not ready yet..."
+          sleep 3
+        done
+        echo "Backend did not start in time "
+        exit 1
+        '''
+    }
+}
 
         stage('Test Backend API') {
             steps {
