@@ -21,7 +21,7 @@ RUN rm -rf /usr/share/nginx/html/*
 # Angular 17+  → dist/<project-name>/browser
 # Angular 16   → dist/<project-name>
 # Change 'taskflow' to match your project name in angular.json
-COPY --from=builder /app/dist/* /usr/share/nginx/html
+COPY --from=builder /app/dist/task-flow /usr/share/nginx/html
 
 # Custom nginx config — required for Angular client-side routing
 COPY nginx.conf /etc/nginx/conf.d/default.conf
