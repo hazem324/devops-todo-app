@@ -25,16 +25,17 @@ pipeline {
 
        stage('Wait for Backend') {
     steps {
-        sh '''
-        for i in {1..200}; do
-          echo "Checking backend..."
-          if curl -f http://localhost:8090/api; then
-            echo "Backend is ready "
+        sh '''#!/bin/bash
+        echo "Waiting for backend to be ready..."
+        for i in $(seq 1 40); do
+          echo "Attempt $i/40..."
+          if curl -sf http://localhost:8090/api; then
+            echo "Backend is ready!"
             exit 0
           fi
-          sleep 3
+          sleep 5
         done
-        echo "Backend not ready "
+        echo "Backend not ready after 40 attempts"
         exit 1
         '''
     }
