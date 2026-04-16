@@ -32,7 +32,7 @@ pipeline {
                   echo "Attempt $i/40..."
 
                   # Check if port 8090 is open (no curl, no auth needed)
-                  if timeout 1 bash -c "</dev/tcp/localhost/8090" 2>/dev/null; then
+                  if timeout 1 bash -c "</dev/tcp/192.168.232.130/8090" 2>/dev/null; then
                     echo "Backend port is open "
                     exit 0
                   fi
@@ -51,7 +51,7 @@ pipeline {
                 sh '''
                 echo "Final backend check..."
 
-                if timeout 1 bash -c "</dev/tcp/localhost/8090" 2>/dev/null; then
+                if timeout 1 bash -c "</dev/tcp/192.168.232.130/8090" 2>/dev/null; then
                   echo "Backend is reachable "
                 else
                   echo "Backend test failed "
