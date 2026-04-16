@@ -1,38 +1,41 @@
-#  Build Spring Boot app with Maven
-
+# Build Spring Boot app with Maven
 FROM eclipse-temurin:17-jdk-alpine AS builder
 
 WORKDIR /app
 
-# Copy Maven wrapper and pom.xml first (layer caching — avoids re-downloading deps)
+# Copy Maven wrapper and config
 COPY mvnw ./
+RUN chmod +x mvnw   
+
 COPY .mvn .mvn
 COPY pom.xml ./
 
-# Download dependencies without source (cached layer)
+# Download dependencies (cached layer)
 RUN ./mvnw dependency:go-offline -B
 
-# Copy source code and build — skip tests for Docker build
+# Copy source code
 COPY src ./src
+
+# Build app
 RUN ./mvnw package -DskipTests
 
- #  Run with lightweight JRE only
+
+# Run with lightweight JRE
 FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-# Create non-root user for security
+# Create non-root user
 RUN addgroup -S spring && adduser -S spring -G spring
 
-# Copy the built jar from builder stage
+# Copy jar
 COPY --from=builder /app/target/*.jar app.jar
 
-# Change ownership to non-root user
+# Set permissions
 RUN chown spring:spring app.jar
 
 USER spring
 
-EXPOSE 8080
+EXPOSE 8090   
 
-# Run the jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
