@@ -29,7 +29,7 @@ pipeline {
         echo "Waiting for backend to be ready..."
         for i in $(seq 1 40); do
           echo "Attempt $i/40..."
-          if curl -sf http://localhost:8090/api; then
+          if curl -sf http://localhost:8090/api/todo; then
             echo "Backend is ready!"
             exit 0
           fi
@@ -42,7 +42,7 @@ pipeline {
 }
         stage('Test Backend API') {
             steps {
-                sh 'curl --fail http://localhost:8090/api'
+                sh 'curl --failsh http://localhost:8090/api/todo'
             }
         }
 
