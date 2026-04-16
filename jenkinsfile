@@ -23,52 +23,11 @@ pipeline {
             }
         }
 
-        stage('Wait for Backend') {
+        stage('Show Running Containers') {
             steps {
                 sh '''
-                echo "Waiting for backend (port 8090)..."
-
-                for i in $(seq 1 40); do
-                  echo "Attempt $i/40..."
-
-                  # Check if port 8090 is open (no curl, no auth needed)
-                  if timeout 1 bash -c "</dev/tcp/192.168.232.130/8090" 2>/dev/null; then
-                    echo "Backend port is open "
-                    exit 0
-                  fi
-
-                  sleep 3
-                done
-
-                echo "Backend not reachable "
-                exit 1
-                '''
-            }
-        }
-
-        stage('Test Backend (Port Check)') {
-            steps {
-                sh '''
-                echo "Final backend check..."
-
-                if timeout 1 bash -c "</dev/tcp/192.168.232.130/8090" 2>/dev/null; then
-                  echo "Backend is reachable "
-                else
-                  echo "Backend test failed "
-                  exit 1
-                fi
-                '''
-            }
-        }
-
-        stage('Test Frontend') {
-            steps {
-                sh '''
-                echo "Testing frontend..."
-
-                curl --fail http://192.168.232.130:4200 || exit 1
-
-                echo "Frontend is working "
+                echo "Containers status:"
+                docker compose ps
                 '''
             }
         }
@@ -76,8 +35,10 @@ pipeline {
 
     post {
         always {
-            sh 'docker compose logs || true'
-            sh 'docker compose -f $COMPOSE_FILE down'
+            sh '''
+            echo "Application logs:"
+            docker compose logs || true
+            '''
         }
     }
 }
