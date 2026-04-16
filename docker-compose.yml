@@ -5,7 +5,7 @@ services:
     build:
       context: ./taskFlow
       dockerfile: Dockerfile
-    image: taskFlow:1.0
+    image: taskflow:1.0
     container_name: angular_app
     restart: unless-stopped
     ports:
