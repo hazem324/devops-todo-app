@@ -1,12 +1,10 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 
-import { Todo, CreateTodoDto, Priority } from  '../../../../model/todo.model';
+import { Todo, CreateTodoDto, Priority } from '../../../../model/todo.model';
 import { TodoService } from '../../../../services/todo.service';
 import { ToastService } from '../../../../services/toast.service';
 import { getErrorMessage } from '../../../../utils/http-error.util';
-
-
 
 @Component({
   selector: 'app-todo-form',
@@ -15,7 +13,7 @@ import { getErrorMessage } from '../../../../utils/http-error.util';
 })
 export class TodoFormComponent {
 
-  /* Emits the fully created Todo (with id from server) up to todo-page */
+  //  Emits ONLY after server responds with the created Todo (contains real id + priority)
   @Output() todoCreated = new EventEmitter<Todo>();
 
   title             = '';
@@ -36,7 +34,7 @@ export class TodoFormComponent {
   /* POST /todo */
   submit(): void {
     const trimmed = this.title.trim();
-    if (!trimmed) return;
+    if (!trimmed || this.isSubmitting) return;
 
     this.isSubmitting = true;
 
@@ -48,12 +46,14 @@ export class TodoFormComponent {
 
     this.todoService.createTodo(dto).subscribe({
       next: (created: Todo) => {
+        //  Only emit after server confirms 
         this.todoCreated.emit(created);
         this.toastService.success(`✓ Task "${created.title}" added.`);
         this.title        = '';
         this.isSubmitting = false;
       },
       error: (err: HttpErrorResponse) => {
+        //  On error, emit NOTHING — no broken todo enters the list
         this.toastService.error(getErrorMessage(err));
         this.isSubmitting = false;
       }

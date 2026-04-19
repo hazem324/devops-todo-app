@@ -6,7 +6,6 @@ import { TodoService } from '../../../../services/todo.service';
 import { ToastService } from '../../../../services/toast.service';
 import { getErrorMessage } from '../../../../utils/http-error.util';
 
-
 @Component({
   selector: 'app-todo-item',
   templateUrl: './todo-item.component.html',
@@ -33,9 +32,22 @@ export class TodoItemComponent {
     private toastService: ToastService
   ) {}
 
-  get paddedId():     string { return this.todo.id.toString().padStart(3, '0'); }
-  get priorityClass():string { return 'priority-' + this.todo.priority.toLowerCase(); }
-  get badgeClass():   string { return 'tag-'      + this.todo.priority.toLowerCase(); }
+  get paddedId(): string {
+    return this.todo?.id?.toString().padStart(3, '0') ?? '000';
+  }
+
+  // ✅ Guard: todo or priority could be null while API response is in flight
+  get priorityClass(): string {
+    return this.todo?.priority
+      ? 'priority-' + this.todo.priority.toLowerCase()
+      : 'priority-low';
+  }
+
+  get badgeClass(): string {
+    return this.todo?.priority
+      ? 'tag-' + this.todo.priority.toLowerCase()
+      : 'tag-low';
+  }
 
   /* PUT /todo/:id/complete  OR  PUT /todo/:id { completed: false } */
   onToggle(): void {
