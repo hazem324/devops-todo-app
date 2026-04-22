@@ -48,15 +48,6 @@ pipeline {
             }
         }
 
-        //  Check containers
-        stage('Show Running Containers') {
-            steps {
-                sh '''
-                echo "Containers status:"
-                docker compose ps
-                '''
-            }
-        }
     }
 
     post {
