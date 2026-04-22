@@ -11,14 +11,6 @@ pipeline {
 
     stages {
 
-        stage('remove old docker compose ') {
-            steps {
-                sh '''
-                docker compose rm  fullstack-ci-cd-pipeline 
-                '''
-            }
-        }
-
         //  Backend tests
         stage('Backend Tests') {
             steps {
