@@ -13,13 +13,14 @@ pipeline {
 
         //  Backend tests
         stage('Backend Tests') {
-            steps {
-                sh '''
-                cd todo-backend
-                ./mvnw clean test
-                '''
-            }
-        }
+    steps {
+        sh '''
+        cd todo-backend
+        chmod +x mvnw
+        ./mvnw clean test
+        '''
+    }
+}
 
         //  Frontend lint + tests
         stage('Frontend Quality') {
