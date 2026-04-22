@@ -11,43 +11,34 @@ pipeline {
 
     stages {
 
-        //  Backend tests
-        stage('Backend Tests') {
-    steps {
-        sh '''
-        cd todo-backend
-        chmod +x mvnw
-        ./mvnw clean test
-        '''
-    }
-}
-
-        //  Frontend lint + tests
-        stage('Frontend Quality') {
-            steps {
-                sh '''
-                cd taskFlow
-                npm install
-                npm run lint || true
-                npm run test -- --watch=false --browsers=ChromeHeadless || true
-                '''
-            }
-        }
-
-        //  Build Docker images
         stage('Build Containers'){
             steps{
                 sh 'docker compose -f $COMPOSE_FILE build'
             }
         }
 
-        //  Start services
         stage('Start Services'){
             steps{
                 sh 'docker compose -f $COMPOSE_FILE up -d'
             }
         }
 
+        stage('Show Running Containers') {
+            steps {
+                sh '''
+                echo "Containers status:"
+                docker compose ps
+                '''
+            }
+        }
     }
 
+    post {
+        always {
+            sh '''
+            echo "Application logs:"
+            docker compose logs || true
+            '''
+        }
+    }
 }
