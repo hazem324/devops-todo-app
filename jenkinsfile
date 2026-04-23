@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
+        SONAR_HOST = 'http://host.docker.internal:9000'   // ✅ fix networking
+        SONAR_TOKEN = credentials('sonar-token')          // ✅ add token
     }
 
     options {
@@ -11,24 +13,62 @@ pipeline {
 
     stages {
 
-        stage('Build Containers'){
-            steps{
+        // ✅ 1. Backend tests FIRST (important)
+        stage('Backend Tests') {
+            steps {
+                sh '''
+                cd todo-backend
+                chmod +x mvnw
+                ./mvnw clean test
+                '''
+            }
+        }
+
+        // 🔥 2. SonarQube Analysis
+        stage('Sonar Backend Analysis') {
+            steps {
+                sh '''
+                cd todo-backend
+                chmod +x mvnw
+
+                ./mvnw sonar:sonar \
+                  -Dsonar.projectKey=todo-backend \
+                  -Dsonar.host.url=$SONAR_HOST \
+                  -Dsonar.login=$SONAR_TOKEN
+                '''
+            }
+        }
+
+        // 🐳 3. Build containers AFTER quality check
+        stage('Build Containers') {
+            steps {
                 sh 'docker compose -f $COMPOSE_FILE build'
             }
         }
 
-        stage('Start Services'){
-            steps{
+        // 🚀 4. Start services
+        stage('Start Services') {
+            steps {
                 sh 'docker compose -f $COMPOSE_FILE up -d'
             }
         }
 
-        stage('Show Running Containers') {
+        // ⏳ 5. Health check backend (better than Sonar wait here)
+        stage('Health Check Backend') {
             steps {
                 sh '''
-                echo "Containers status:"
-                docker compose ps
+                echo "Waiting for backend..."
+                sleep 15
+
+                curl -f http://localhost:8090/api/todo
                 '''
+            }
+        }
+
+        // 📊 6. Show containers
+        stage('Show Running Containers') {
+            steps {
+                sh 'docker compose ps'
             }
         }
     }
@@ -39,6 +79,14 @@ pipeline {
             echo "Application logs:"
             docker compose logs || true
             '''
+        }
+
+        success {
+            echo " Pipeline completed successfully!"
+        }
+
+        failure {
+            echo " Pipeline failed. Check logs above."
         }
     }
 }
