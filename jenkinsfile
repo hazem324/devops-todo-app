@@ -53,18 +53,6 @@ pipeline {
             }
         }
 
-        // ⏳ 5. Health check backend (better than Sonar wait here)
-        stage('Health Check Backend') {
-            steps {
-                sh '''
-                echo "Waiting for backend..."
-                sleep 15
-
-                curl -f http://localhost:8090/api/todo
-                '''
-            }
-        }
-
         // 📊 6. Show containers
         stage('Show Running Containers') {
             steps {

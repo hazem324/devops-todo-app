@@ -19,7 +19,6 @@ class TodoServiceTest {
     @Autowired
     IToDoService service;
 
-    // ✅ Create and retrieve by id
     @Test
     void shouldCreateTodo() {
         Todo todo = new Todo();
@@ -34,14 +33,12 @@ class TodoServiceTest {
         assertEquals(Priority.HIGH, saved.getPriority());
     }
 
-    // ✅ List is not null
     @Test
     void shouldReturnList_notNull() {
         List<Todo> todos = service.getAllTodos();
         assertNotNull(todos);
     }
 
-    // ✅ Created todo appears in list
     @Test
     void shouldAddTodo_andRetrieveIt() {
         Todo todo = new Todo();
@@ -54,7 +51,6 @@ class TodoServiceTest {
         assertTrue(todos.stream().anyMatch(t -> "Retrieve Task".equals(t.getTitle())));
     }
 
-    // ✅ Default priority is LOW when null
     @Test
     void shouldDefaultPriority_toLow() {
         Todo todo = new Todo();
@@ -66,7 +62,6 @@ class TodoServiceTest {
         assertEquals(Priority.LOW, saved.getPriority());
     }
 
-    // ✅ getTodoById
     @Test
     void shouldGetTodoById() {
         Todo todo = new Todo();
@@ -80,14 +75,12 @@ class TodoServiceTest {
         assertEquals(saved.getId(), found.getId());
     }
 
-    // ✅ getTodoById with non-existent id returns null
     @Test
     void shouldReturnNull_whenIdNotFound() {
         Todo found = service.getTodoById(99999L);
         assertNull(found);
     }
 
-    // ✅ updateTodo
     @Test
     void shouldUpdateTodo() {
         Todo todo = new Todo();
@@ -108,7 +101,6 @@ class TodoServiceTest {
         assertEquals(Priority.HIGH, updated.getPriority());
     }
 
-    // ✅ updateTodo with non-existent id returns null
     @Test
     void shouldReturnNull_whenUpdateNonExistentId() {
         Todo update = new Todo();
@@ -119,7 +111,6 @@ class TodoServiceTest {
         assertNull(result);
     }
 
-    // ✅ markAsCompleted
     @Test
     void shouldMarkTodo_asCompleted() {
         Todo todo = new Todo();
@@ -133,14 +124,12 @@ class TodoServiceTest {
         assertTrue(marked.isCompleted());
     }
 
-    // ✅ markAsCompleted with non-existent id returns null
     @Test
     void shouldReturnNull_whenMarkCompletedNonExistent() {
         Todo result = service.markAsCompleted(99999L);
         assertNull(result);
     }
 
-    // ✅ updatePriority
     @Test
     void shouldUpdatePriority() {
         Todo todo = new Todo();
@@ -154,7 +143,6 @@ class TodoServiceTest {
         assertEquals(Priority.HIGH, updated.getPriority());
     }
 
-    // ✅ getTodosByCompleted
     @Test
     void shouldGetTodosByCompleted() {
         Todo todo = new Todo();
@@ -168,7 +156,6 @@ class TodoServiceTest {
         assertTrue(done.stream().anyMatch(t -> t.getId().equals(saved.getId())));
     }
 
-    // ✅ getTodosByPriority
     @Test
     void shouldGetTodosByPriority() {
         Todo todo = new Todo();
@@ -181,7 +168,6 @@ class TodoServiceTest {
         assertTrue(highList.stream().anyMatch(t -> t.getId().equals(saved.getId())));
     }
 
-    // ✅ deleteTodo removes from list
     @Test
     void shouldDeleteTodo() {
         Todo todo = new Todo();

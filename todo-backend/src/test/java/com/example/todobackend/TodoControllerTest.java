@@ -22,7 +22,6 @@ class TodoControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
 
-    // ✅ GET /todo → 200 + JSON array
     @Test
     void shouldGetTodos_withJsonResponse() throws Exception {
         mockMvc.perform(get("/todo"))
@@ -31,7 +30,6 @@ class TodoControllerTest {
                 .andExpect(jsonPath("$").isArray());
     }
 
-    // ✅ POST /todo with valid body → 200 + todo returned
     @Test
     void shouldCreateTodo_andReturnData() throws Exception {
         String json = """
@@ -50,7 +48,7 @@ class TodoControllerTest {
                 .andExpect(jsonPath("$.title").value("Test Task"));
     }
 
-    // ✅ POST /todo with missing title → 400  ← THIS WAS FAILING
+   
     @Test
     void shouldFail_whenTitleMissing() throws Exception {
         mockMvc.perform(post("/todo")
@@ -59,7 +57,6 @@ class TodoControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ✅ POST /todo with blank title → 400
     @Test
     void shouldFail_whenTitleBlank() throws Exception {
         String json = """
@@ -75,7 +72,6 @@ class TodoControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ✅ DELETE /todo/:id → 200 (your controller returns void, not 204)
     @Test
     void shouldDeleteTodo() throws Exception {
         // create first
@@ -119,7 +115,6 @@ class TodoControllerTest {
                 .andExpect(jsonPath("$.completed").value(true));
     }
 
-    // ✅ GET /todo/completed/false → 200 + array
     @Test
     void shouldGetPendingTodos() throws Exception {
         mockMvc.perform(get("/todo/completed/false"))
@@ -127,7 +122,6 @@ class TodoControllerTest {
                 .andExpect(jsonPath("$").isArray());
     }
 
-    // ✅ GET /todo/priority/HIGH → 200 + array
     @Test
     void shouldGetTodosByPriority() throws Exception {
         mockMvc.perform(get("/todo/priority/HIGH"))
@@ -135,7 +129,6 @@ class TodoControllerTest {
                 .andExpect(jsonPath("$").isArray());
     }
 
-    // ✅ PUT /todo/:id/priority/MEDIUM → 200 + updated priority
     @Test
     void shouldUpdatePriority() throws Exception {
         String json = """
