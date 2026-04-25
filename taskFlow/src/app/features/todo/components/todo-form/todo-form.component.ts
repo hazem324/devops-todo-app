@@ -48,7 +48,7 @@ export class TodoFormComponent {
       next: (created: Todo) => {
         //  Only emit after server confirms 
         this.todoCreated.emit(created);
-        this.toastService.success(`✓ Task "${created.title}" added.`);
+        this.toastService.success(` Task "${created.title}" added.`);
         this.title        = '';
         this.isSubmitting = false;
       },

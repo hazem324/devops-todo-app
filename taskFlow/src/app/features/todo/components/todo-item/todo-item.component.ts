@@ -36,7 +36,7 @@ export class TodoItemComponent {
     return this.todo?.id?.toString().padStart(3, '0') ?? '000';
   }
 
-  // ✅ Guard: todo or priority could be null while API response is in flight
+  //  Guard: todo or priority could be null while API response is in flight
   get priorityClass(): string {
     return this.todo?.priority
       ? 'priority-' + this.todo.priority.toLowerCase()
@@ -64,7 +64,7 @@ export class TodoItemComponent {
       this.todoService.updateTodo(this.todo.id, dto).subscribe({
         next: (updated) => {
           this.todoUpdated.emit(updated);
-          this.toastService.info('↩ Task moved back to pending.');
+          this.toastService.info(' Task moved back to pending.');
         },
         error: (err: HttpErrorResponse) => this.toastService.error(getErrorMessage(err))
       });
@@ -83,7 +83,7 @@ export class TodoItemComponent {
     this.todoService.updateTodo(this.todo.id, dto).subscribe({
       next: (updated) => {
         this.todoUpdated.emit(updated);
-        this.toastService.success('✓ Task updated.');
+        this.toastService.success(' Task updated.');
         this.isSaving = false;
       },
       error: (err: HttpErrorResponse) => {
@@ -99,7 +99,7 @@ export class TodoItemComponent {
     this.todoService.deleteTodo(this.todo.id).subscribe({
       next: () => {
         this.todoDeleted.emit(this.todo.id);
-        this.toastService.info(`🗑 Task "${this.todo.title}" deleted.`);
+        this.toastService.info(` Task "${this.todo.title}" deleted.`);
       },
       error: (err: HttpErrorResponse) => {
         this.toastService.error(getErrorMessage(err));

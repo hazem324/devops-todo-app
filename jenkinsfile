@@ -1,10 +1,14 @@
 pipeline {
     agent any 
 
+    tools {
+        nodejs "Node18"   // 🔥 VERY IMPORTANT
+    }
+
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
-        SONAR_HOST = 'http://sonarqube:9000'   
-        SONAR_TOKEN = credentials('sonar-token')        
+        SONAR_HOST = 'http://sonarqube:9000'
+        SONAR_TOKEN = credentials('sonar-token')
     }
 
     options {
@@ -13,7 +17,7 @@ pipeline {
 
     stages {
 
-        // ✅ 1. Backend tests FIRST (important)
+        // ✅ 1. Backend tests
         stage('Backend Tests') {
             steps {
                 sh '''
@@ -24,14 +28,12 @@ pipeline {
             }
         }
 
-        // 🔥 2. SonarQube Analysis
+        // 🔥 2. Sonar Backend
         stage('Sonar Backend Analysis') {
             steps {
                 sh '''
                 cd todo-backend
-                chmod +x mvnw
-
-                ./mvnw clean verify sonar:sonar \
+                ./mvnw sonar:sonar \
                   -Dsonar.projectKey=todo-backend \
                   -Dsonar.host.url=$SONAR_HOST \
                   -Dsonar.login=$SONAR_TOKEN
@@ -39,21 +41,54 @@ pipeline {
             }
         }
 
-        // 🐳 3. Build containers AFTER quality check
+        // 🧪 3. Frontend Tests (Angular)
+        stage('Frontend Tests') {
+            steps {
+                sh '''
+                cd taskFlow
+                rm -rf node_modules package-lock.json || true
+                npm install
+
+                # Run Angular tests with coverage
+                npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
+                '''
+            }
+        }
+
+        // 🔥 4. Sonar Frontend
+        stage('Sonar Frontend Analysis') {
+            steps {
+                sh '''
+                cd taskFlow
+
+                sonar-scanner \
+                  -Dsonar.projectKey=todo-frontend \
+                  -Dsonar.sources=src \
+                  -Dsonar.tests=src \
+                  -Dsonar.test.inclusions=**/*.spec.ts \
+                  -Dsonar.exclusions=**/node_modules/** \
+                  -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                  -Dsonar.host.url=$SONAR_HOST \
+                  -Dsonar.login=$SONAR_TOKEN
+                '''
+            }
+        }
+
+        // 🐳 5. Build containers AFTER quality check
         stage('Build Containers') {
             steps {
                 sh 'docker compose -f $COMPOSE_FILE build'
             }
         }
 
-        // 🚀 4. Start services
+        // 🚀 6. Start services
         stage('Start Services') {
             steps {
                 sh 'docker compose -f $COMPOSE_FILE up -d'
             }
         }
 
-        // 📊 6. Show containers
+        // 📊 7. Show containers
         stage('Show Running Containers') {
             steps {
                 sh 'docker compose ps'
