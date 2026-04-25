@@ -38,6 +38,16 @@ pipeline {
             }
         }
 
+
+        stage('Debug Frontend Path') {
+    steps {
+        sh '''
+        ls -la taskFlow
+        ls -la taskFlow/*
+        '''
+    }
+}
+
         // 🧪 3. Frontend Tests (Angular)
         stage('Frontend Tests') {
             steps {
