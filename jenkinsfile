@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
-        SONAR_HOST = 'http://host.docker.internal:9000'   // ✅ fix networking
-        SONAR_TOKEN = credentials('sonar-token')          // ✅ add token
+        SONAR_HOST = 'http://sonarqube:9000'   
+        SONAR_TOKEN = credentials('sonar-token')        
     }
 
     options {
