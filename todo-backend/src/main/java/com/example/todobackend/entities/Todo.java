@@ -36,6 +36,7 @@ public void onCreate() {
     Date now = new Date();
     this.createdAt = now;
     this.updatedAt = now;
+    if (this.priority == null) this.priority = Priority.LOW;
 }
 
 @PreUpdate
