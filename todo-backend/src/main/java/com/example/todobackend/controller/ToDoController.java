@@ -4,7 +4,10 @@ import com.example.todobackend.entities.Priority;
 import com.example.todobackend.entities.Todo;
 import com.example.todobackend.services.IToDoService;
 import lombok.AllArgsConstructor;
+
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -17,7 +20,7 @@ public class ToDoController {
 
     // Create Todo
     @PostMapping
-    public Todo createTodo(@RequestBody Todo todo) {
+    public Todo createTodo(@Validated @RequestBody Todo todo) {
         return toDoService.createTodo(todo);
     }
 
@@ -35,7 +38,7 @@ public class ToDoController {
 
     // Update Todo
     @PutMapping("/{id}")
-    public Todo updateTodo(@PathVariable Long id, @RequestBody Todo todo) {
+    public Todo updateTodo(@PathVariable Long id, @Valid @RequestBody Todo todo) {
         return toDoService.updateTodo(id, todo);
     }
 
