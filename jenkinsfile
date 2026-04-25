@@ -51,23 +51,15 @@ pipeline {
         // 🧪 3. Frontend Tests (Angular)
         stage('Frontend Tests') {
     steps {
-        sh '''
-        cd taskFlow
-
-        echo "Current dir:"
-        pwd
-        ls -la
-
-        docker run --rm \
-          -v "$(pwd):/app" \
-          -w /app \
-          node:18 \
-          sh -c "
-            ls -la &&
-            npm install &&
-            npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
-          "
-        '''
+        script {
+            docker.image('zenika/alpine-chrome:with-node').inside {
+                sh '''
+                cd taskFlow
+                npm install
+                npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
+                '''
+            }
+        }
     }
 }
 
