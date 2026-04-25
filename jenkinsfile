@@ -81,9 +81,9 @@ pipeline {
                 echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
                 # Tag images
-                docker tag todo-backend:latest $DOCKER_USER/todo-backend:latest
+                docker tag backend:1.0 $DOCKER_USER/todo-backend:latest
                 docker tag taskflow:1.0 $DOCKER_USER/taskflow:latest
-
+                
                 # Push images
                 docker push $DOCKER_USER/todo-backend:latest
                 docker push $DOCKER_USER/taskflow:latest
