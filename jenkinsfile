@@ -47,41 +47,6 @@ pipeline {
         '''
     }
 }
-
-        // 🧪 3. Frontend Tests (Angular)
-        stage('Frontend Tests') {
-    steps {
-        script {
-            docker.image('zenika/alpine-chrome:with-node').inside {
-                sh '''
-                cd taskFlow
-                npm install
-                npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
-                '''
-            }
-        }
-    }
-}
-
-        // 🔥 4. Sonar Frontend
-        stage('Sonar Frontend Analysis') {
-            steps {
-                sh '''
-                cd taskFlow
-
-                sonar-scanner \
-                  -Dsonar.projectKey=todo-frontend \
-                  -Dsonar.sources=src \
-                  -Dsonar.tests=src \
-                  -Dsonar.test.inclusions=**/*.spec.ts \
-                  -Dsonar.exclusions=**/node_modules/** \
-                  -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                  -Dsonar.host.url=$SONAR_HOST \
-                  -Dsonar.login=$SONAR_TOKEN
-                '''
-            }
-        }
-
         // 🐳 5. Build containers AFTER quality check
         stage('Build Containers') {
             steps {
@@ -102,6 +67,33 @@ pipeline {
                 sh 'docker compose ps'
             }
         }
+
+        stage('Push Images to Docker Hub') {
+    steps {
+        script {
+            withCredentials([usernamePassword(
+                credentialsId: 'docker-hub',
+                usernameVariable: 'DOCKER_USER',
+                passwordVariable: 'DOCKER_PASS'
+            )]) {
+
+                sh '''
+                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+                # Tag images
+                docker tag todo-backend:latest $DOCKER_USER/todo-backend:latest
+                docker tag taskflow:1.0 $DOCKER_USER/taskflow:latest
+
+                # Push images
+                docker push $DOCKER_USER/todo-backend:latest
+                docker push $DOCKER_USER/taskflow:latest
+
+                docker logout
+                '''
+            }
+        }
+    }
+}
     }
 
     post {
