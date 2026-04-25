@@ -42,14 +42,16 @@ pipeline {
         stage('Frontend Tests') {
             steps {
                 sh '''
-                cd taskFlow
-                rm -rf node_modules package-lock.json || true
-                npm install
-
-                # Run Angular tests with coverage
-                npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
-                '''
-            }
+                docker run --rm \
+                  -v $(pwd)/taskFlow:/app \
+                  -w /app \
+                  node:18 \
+                  sh -c "
+                    npm install &&
+                 npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
+          "
+        '''
+    }
         }
 
         // 🔥 4. Sonar Frontend
