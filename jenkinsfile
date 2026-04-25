@@ -50,19 +50,20 @@ pipeline {
 
         // 🧪 3. Frontend Tests (Angular)
         stage('Frontend Tests') {
-            steps {
-                sh '''
-                docker run --rm \
-                  -v $(pwd)/taskFlow:/app \
-                  -w /app \
-                  node:18 \
-                  sh -c "
-                    npm install &&
-                 npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
+    steps {
+        sh '''
+        docker run --rm \
+          -v "$WORKSPACE/taskFlow:/app" \
+          -w /app \
+          node:18 \
+          sh -c "
+            ls -la &&
+            npm install &&
+            npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
           "
         '''
     }
-        }
+}
 
         // 🔥 4. Sonar Frontend
         stage('Sonar Frontend Analysis') {
