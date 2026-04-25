@@ -19,7 +19,7 @@ pipeline {
                 sh '''
                 cd todo-backend
                 chmod +x mvnw
-                ./mvnw clean test
+                ./mvnw clean verify
                 '''
             }
         }
@@ -31,7 +31,7 @@ pipeline {
                 cd todo-backend
                 chmod +x mvnw
 
-                ./mvnw sonar:sonar \
+                ./mvnw clean verify sonar:sonar \
                   -Dsonar.projectKey=todo-backend \
                   -Dsonar.host.url=$SONAR_HOST \
                   -Dsonar.login=$SONAR_TOKEN
