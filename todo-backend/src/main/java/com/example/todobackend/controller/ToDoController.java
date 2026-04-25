@@ -21,7 +21,7 @@ public class ToDoController {
         return toDoService.createTodo(todo);
     }
 
-    // Get all Todos
+    // Get all 
     @GetMapping
     public List<Todo> getAllTodos() {
         return toDoService.getAllTodos();
@@ -45,19 +45,19 @@ public class ToDoController {
         toDoService.deleteTodo(id);
     }
 
-    // Get Todos by completed
+    // Get by completed
     @GetMapping("/completed/{completed}")
     public List<Todo> getTodosByCompleted(@PathVariable boolean completed) {
         return toDoService.getTodosByCompleted(completed);
     }
 
-    // Get Todos by priority
+    // Get  by priority
     @GetMapping("/priority/{priority}")
     public List<Todo> getTodosByPriority(@PathVariable Priority priority) {
         return toDoService.getTodosByPriority(priority);
     }
 
-    // Mark Todo as completed
+    // Mark  as completed
     @PutMapping("/{id}/complete")
     public Todo markAsCompleted(@PathVariable Long id) {
         return toDoService.markAsCompleted(id);

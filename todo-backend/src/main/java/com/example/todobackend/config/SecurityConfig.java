@@ -1,5 +1,6 @@
 package com.example.todobackend.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,12 +11,17 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
- 
+
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Value("${cors.allowed-origins}")
+    private String allowedOrigins;
+
  
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -44,12 +50,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
  
         //  Allow Angular dev server + Docker frontend
-        config.setAllowedOrigins(List.of(
-            "http://localhost:4200",      // ng serve
-            "http://localhost:80",        // Docker frontend
-            "http://localhost",           // Docker frontend (no port)
-            "http://192.168.232.130:4200" // your current dev IP
-        ));
+        config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
  
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
