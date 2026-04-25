@@ -52,15 +52,17 @@ pipeline {
         stage('Frontend Tests') {
     steps {
         sh '''
-        echo "Workspace is: $WORKSPACE"
+        cd taskFlow
+
+        echo "Current dir:"
+        pwd
+        ls -la
 
         docker run --rm \
-          -v "$WORKSPACE/taskFlow:/app" \
+          -v "$(pwd):/app" \
           -w /app \
           node:18 \
           sh -c "
-            echo 'Inside container:' &&
-            pwd &&
             ls -la &&
             npm install &&
             npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
