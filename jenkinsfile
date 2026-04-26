@@ -94,6 +94,24 @@ pipeline {
         }
     }
 }
+
+stage('Deploy to Kubernetes') {
+    steps {
+        sh '''
+        echo "Deploying to Kubernetes..."
+
+        kubectl apply -f k8s/namespace.yaml
+
+        kubectl apply -f k8s/ -n task-flow
+
+        kubectl rollout status deployment/backend -n task-flow
+        kubectl rollout status deployment/frontend -n task-flow
+        kubectl rollout status deployment/taskflow-db -n task-flow
+
+        echo "Deployment completed"
+        '''
+    }
+}
     }
 
     post {

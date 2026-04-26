@@ -1,17 +1,19 @@
-apiVersion: apps/v1 
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  labels:
-    app: taskflow-frontend
-spec: 
+spec:
   replicas: 1
   selector:
     matchLabels:
       app: taskflow-frontend
   template:
-    containers:
-      - name: frontend
-        image: hazem231/taskflow:latest
-      ports: 
-        - containerPort: 80
+    metadata:
+      labels:
+        app: taskflow-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: hazem231/taskflow:latest
+          ports:
+            - containerPort: 80
