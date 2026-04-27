@@ -1,7 +1,6 @@
 pipeline {
     agent any 
 
-
     environment {
         COMPOSE_FILE = 'docker-compose.yml'
         SONAR_HOST = 'http://sonarqube:9000'
@@ -14,7 +13,7 @@ pipeline {
 
     stages {
 
-        // Backend tests
+        // 🔹 1. Backend Tests
         stage('Backend Tests') {
             steps {
                 sh '''
@@ -25,7 +24,7 @@ pipeline {
             }
         }
 
-        // Sonar Backend
+        // 🔹 2. Sonar Backend Analysis
         stage('Sonar Backend Analysis') {
             steps {
                 sh '''
@@ -38,104 +37,110 @@ pipeline {
             }
         }
 
-
+        // 🔥 3. Frontend Tests (FIXED)
         stage('Frontend Tests') {
-    steps {
-        sh '''
-        echo "Running Angular tests..."
+            environment {
+                CHROME_BIN = '/usr/bin/chromium'
+            }
+            steps {
+                sh '''
+                echo "Running Angular tests..."
 
-        cd taskFlow
+                cd taskFlow
 
-        # Install dependencies
-        npm install
+                npm install
 
-        # Run tests with coverage
-        npm run test -- --watch=false --code-coverage
-        '''
-    }
-}
+                # Headless Chrome for CI
+                npm run test -- --watch=false --code-coverage --browsers=ChromeHeadless --no-sandbox
+                '''
+            }
+        }
 
-stage('Sonar Frontend Analysis') {
-    steps {
-        sh '''
-        echo "Running SonarQube analysis for Angular..."
+        // 🔹 4. Sonar Frontend Analysis
+        stage('Sonar Frontend Analysis') {
+            steps {
+                sh '''
+                echo "Running SonarQube analysis for Angular..."
 
-        cd taskFlow
+                cd taskFlow
 
-        sonar-scanner \
-          -Dsonar.projectKey=todo-frontend \
-          -Dsonar.sources=src \
-          -Dsonar.host.url=$SONAR_HOST \
-          -Dsonar.login=$SONAR_TOKEN \
-          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-        '''
-    }
-}
-        // Build containers AFTER quality check
+                sonar-scanner \
+                  -Dsonar.projectKey=todo-frontend \
+                  -Dsonar.sources=src \
+                  -Dsonar.host.url=$SONAR_HOST \
+                  -Dsonar.login=$SONAR_TOKEN \
+                  -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                '''
+            }
+        }
+
+        // 🔹 5. Build Docker Containers
         stage('Build Containers') {
             steps {
                 sh 'docker compose -f $COMPOSE_FILE build'
             }
         }
 
-        // Start services
+        // 🔹 6. Start Services (optional for testing)
         stage('Start Services') {
             steps {
                 sh 'docker compose -f $COMPOSE_FILE up -d'
             }
         }
 
-        // Show containers
+        // 🔹 7. Show Running Containers
         stage('Show Running Containers') {
             steps {
                 sh 'docker compose ps'
             }
         }
 
+        // 🔹 8. Push Images to Docker Hub
         stage('Push Images to Docker Hub') {
-    steps {
-        script {
-            withCredentials([usernamePassword(
-                credentialsId: 'docker-hub',
-                usernameVariable: 'DOCKER_USER',
-                passwordVariable: 'DOCKER_PASS'
-            )]) {
+            steps {
+                script {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'docker-hub',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
 
+                        sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+                        # Tag images
+                        docker tag backend:1.0 $DOCKER_USER/todo-backend:latest
+                        docker tag taskflow:1.0 $DOCKER_USER/taskflow:latest
+                        
+                        # Push images
+                        docker push $DOCKER_USER/todo-backend:latest
+                        docker push $DOCKER_USER/taskflow:latest
+
+                        docker logout
+                        '''
+                    }
+                }
+            }
+        }
+
+        // 🔹 9. Deploy to Kubernetes
+        stage('Deploy to Kubernetes') {
+            steps {
                 sh '''
-                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                echo "Deploying to Kubernetes..."
 
-                # Tag images
-                docker tag backend:1.0 $DOCKER_USER/todo-backend:latest
-                docker tag taskflow:1.0 $DOCKER_USER/taskflow:latest
-                
-                # Push images
-                docker push $DOCKER_USER/todo-backend:latest
-                docker push $DOCKER_USER/taskflow:latest
+                kubectl apply -f k8s/namespace.yml
 
-                docker logout
+                kubectl apply -f k8s/ -n task-flow
+
+                kubectl rollout status deployment/backend -n task-flow
+                kubectl rollout status deployment/frontend -n task-flow
+                kubectl rollout status deployment/taskflow-db -n task-flow
+
+                echo "Deployment completed"
                 '''
             }
         }
-    }
-}
-
-stage('Deploy to Kubernetes') {
-    steps {
-        sh '''
-        echo "Deploying to Kubernetes..."
-
-        kubectl apply -f k8s/namespace.yml
-
-        kubectl apply -f k8s/ -n task-flow
-
-        kubectl rollout status deployment/backend -n task-flow
-        kubectl rollout status deployment/frontend -n task-flow
-        kubectl rollout status deployment/taskflow-db -n task-flow
-
-        echo "Deployment completed"
-        '''
-    }
-}
     }
 
     post {
