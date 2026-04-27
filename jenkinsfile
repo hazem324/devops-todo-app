@@ -39,11 +39,35 @@ pipeline {
         }
 
 
-        stage('Debug Frontend Path') {
+        stage('Frontend Tests') {
     steps {
         sh '''
-        ls -la taskFlow
-        ls -la taskFlow/*
+        echo "Running Angular tests..."
+
+        cd taskFlow
+
+        # Install dependencies
+        npm install
+
+        # Run tests with coverage
+        npm run test -- --watch=false --code-coverage
+        '''
+    }
+}
+
+stage('Sonar Frontend Analysis') {
+    steps {
+        sh '''
+        echo "Running SonarQube analysis for Angular..."
+
+        cd taskFlow
+
+        sonar-scanner \
+          -Dsonar.projectKey=todo-frontend \
+          -Dsonar.sources=src \
+          -Dsonar.host.url=$SONAR_HOST \
+          -Dsonar.login=$SONAR_TOKEN \
+          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
         '''
     }
 }
