@@ -5,6 +5,10 @@ pipeline {
         COMPOSE_FILE = 'docker-compose.yml'
         SONAR_HOST = 'http://sonarqube:9000'
         SONAR_TOKEN = credentials('sonar-token')
+
+        DOCKER_IMAGE_BACK = 'todo-backend'
+        DOCKER_IMAGE_FRONT = 'taskflow'
+        VERSION = "${BUILD_NUMBER}"   // simple versioning
     }
 
     options {
@@ -13,145 +17,143 @@ pipeline {
 
     stages {
 
-        // 🔹 1. Backend Tests
-        stage('Backend Tests') {
-            steps {
-                sh '''
-                cd todo-backend
-                chmod +x mvnw
-                ./mvnw clean verify
-                '''
-            }
-        }
+        //  TESTS IN PARALLEL
+        stage('Tests') {
+            parallel {
 
-        // 🔹 2. Sonar Backend Analysis
-        stage('Sonar Backend Analysis') {
-            steps {
-                sh '''
-                cd todo-backend
-                ./mvnw sonar:sonar \
-                  -Dsonar.projectKey=todo-backend \
-                  -Dsonar.host.url=$SONAR_HOST \
-                  -Dsonar.login=$SONAR_TOKEN
-                '''
-            }
-        }
-
-        // 🔥 3. Frontend Tests (FIXED)
-        stage('Frontend Tests') {
-    environment {
-        CHROME_BIN = '/usr/bin/chromium'
-    }
-    steps {
-        sh '''
-        echo "Running Angular tests..."
-        cd taskFlow
-        npm install
-        npm run test -- --watch=false --code-coverage
-        '''
-    }
-}
-        // 🔹 4. Sonar Frontend Analysis
-        stage('Sonar Frontend Analysis') {
-            steps {
-                sh '''
-                echo "Running SonarQube analysis for Angular..."
-
-                cd taskFlow
-
-                npx sonar-scanner \
-                  -Dsonar.projectKey=todo-frontend \
-                  -Dsonar.sources=src \
-                  -Dsonar.host.url=$SONAR_HOST \
-                  -Dsonar.login=$SONAR_TOKEN \
-                  -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-                '''
-            }
-        }
-
-        // 🔹 5. Build Docker Containers
-        stage('Build Containers') {
-            steps {
-                sh 'docker compose -f $COMPOSE_FILE build'
-            }
-        }
-
-        // 🔹 6. Start Services (optional for testing)
-        stage('Start Services') {
-            steps {
-                sh 'docker compose -f $COMPOSE_FILE up -d'
-            }
-        }
-
-        // 🔹 7. Show Running Containers
-        stage('Show Running Containers') {
-            steps {
-                sh 'docker compose ps'
-            }
-        }
-
-        // 🔹 8. Push Images to Docker Hub
-        stage('Push Images to Docker Hub') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(
-                        credentialsId: 'docker-hub',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )]) {
-
+                stage('Backend Tests') {
+                    steps {
                         sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        cd todo-backend
+                        chmod +x mvnw
+                        ./mvnw clean verify
+                        '''
+                    }
+                }
 
-                        # Tag images
-                        docker tag backend:1.0 $DOCKER_USER/todo-backend:latest
-                        docker tag taskflow:1.0 $DOCKER_USER/taskflow:latest
-                        
-                        # Push images
-                        docker push $DOCKER_USER/todo-backend:latest
-                        docker push $DOCKER_USER/taskflow:latest
-
-                        docker logout
+                stage('Frontend Tests') {
+                    environment {
+                        CHROME_BIN = '/usr/bin/chromium'
+                    }
+                    steps {
+                        sh '''
+                        cd taskFlow
+                        npm ci
+                        npm run test -- --watch=false --code-coverage
                         '''
                     }
                 }
             }
         }
 
-        // 🔹 9. Deploy to Kubernetes
-       // stage('Deploy to Kubernetes') {
-         //   steps {
-             //   sh '''
-              //  echo "Deploying to Kubernetes..."
+        // SONAR ANALYSIS IN PARALLEL
+        stage('Sonar Analysis') {
+            parallel {
 
-              //  kubectl apply -f k8s/namespace.yml
+                stage('Backend Sonar') {
+                    steps {
+                        sh '''
+                        cd todo-backend
+                        ./mvnw sonar:sonar \
+                          -Dsonar.projectKey=todo-backend \
+                          -Dsonar.host.url=$SONAR_HOST \
+                          -Dsonar.login=$SONAR_TOKEN
+                        '''
+                    }
+                }
 
-              //  kubectl apply -f k8s/ -n task-flow
+                stage('Frontend Sonar') {
+                    steps {
+                        sh '''
+                        cd taskFlow
+                        npx sonar-scanner \
+                          -Dsonar.projectKey=todo-frontend \
+                          -Dsonar.sources=src \
+                          -Dsonar.host.url=$SONAR_HOST \
+                          -Dsonar.login=$SONAR_TOKEN \
+                          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                        '''
+                    }
+                }
+            }
+        }
 
-               // kubectl rollout status deployment/backend -n task-flow
-              //  kubectl rollout status deployment/frontend -n task-flow
-              //  kubectl rollout status deployment/taskflow-db -n task-flow
+        //  QUALITY GATE (IMPORTANT)
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
 
-             //   echo "Deployment completed"
-             //   '''
-           // }
-       // }
+        // BUILD DOCKER IMAGES
+        stage('Build Docker Images') {
+            steps {
+                sh '''
+                docker compose -f $COMPOSE_FILE build
+
+                # Tag with version
+                docker tag backend:1.0 $DOCKER_IMAGE_BACK:$VERSION
+                docker tag taskflow:1.0 $DOCKER_IMAGE_FRONT:$VERSION
+                '''
+            }
+        }
+
+        //  PUSH TO DOCKER HUB
+        stage('Push Images') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-hub',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+                    docker tag $DOCKER_IMAGE_BACK:$VERSION $DOCKER_USER/$DOCKER_IMAGE_BACK:latest
+                    docker tag $DOCKER_IMAGE_FRONT:$VERSION $DOCKER_USER/$DOCKER_IMAGE_FRONT:latest
+
+                    docker push $DOCKER_USER/$DOCKER_IMAGE_BACK:latest
+                    docker push $DOCKER_USER/$DOCKER_IMAGE_FRONT:latest
+
+                    docker logout
+                    '''
+                }
+            }
+        }
+
+        //  DEPLOY TO KUBERNETES
+        stage('Deploy') {
+            steps {
+                sh '''
+                echo "Deploying to Kubernetes..."
+
+                kubectl apply -f k8s/namespace.yml
+                kubectl apply -f k8s/ -n task-flow
+
+                # Wait for rollout
+                kubectl rollout status deployment/backend -n task-flow
+                kubectl rollout status deployment/frontend -n task-flow
+
+                echo "Deployment successful"
+                '''
+            }
+        }
     }
 
     post {
         always {
-            sh '''
-            echo "Application logs:"
-            docker compose logs || true
-            '''
+            sh 'docker compose logs || true'
         }
 
         success {
-            echo " Pipeline completed successfully!"
+            echo " Pipeline SUCCESS"
         }
 
         failure {
-            echo " Pipeline failed. Check logs above."
+            echo " Pipeline FAILED"
         }
     }
 }
