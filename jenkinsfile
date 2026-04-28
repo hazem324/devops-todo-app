@@ -59,7 +59,7 @@ pipeline {
 
                 cd taskFlow
 
-                sonar-scanner \
+                npx sonar-scanner \
                   -Dsonar.projectKey=todo-frontend \
                   -Dsonar.sources=src \
                   -Dsonar.host.url=$SONAR_HOST \
