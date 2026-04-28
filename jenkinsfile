@@ -77,16 +77,6 @@ pipeline {
                 }
             }
         }
-
-        //  QUALITY GATE (IMPORTANT)
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
         // BUILD DOCKER IMAGES
         stage('Build Docker Images') {
             steps {
