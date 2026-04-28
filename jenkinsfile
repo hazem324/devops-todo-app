@@ -39,23 +39,18 @@ pipeline {
 
         // 🔥 3. Frontend Tests (FIXED)
         stage('Frontend Tests') {
-            environment {
-                CHROME_BIN = '/usr/bin/chromium'
-            }
-            steps {
-                sh '''
-                echo "Running Angular tests..."
-
-                cd taskFlow
-
-                npm install
-
-                # Headless Chrome for CI
-                npm run test -- --watch=false --code-coverage --browsers=ChromeHeadless --no-sandbox
-                '''
-            }
-        }
-
+    environment {
+        CHROME_BIN = '/usr/bin/chromium'
+    }
+    steps {
+        sh '''
+        echo "Running Angular tests..."
+        cd taskFlow
+        npm install
+        npm run test -- --watch=false --code-coverage
+        '''
+    }
+}
         // 🔹 4. Sonar Frontend Analysis
         stage('Sonar Frontend Analysis') {
             steps {
