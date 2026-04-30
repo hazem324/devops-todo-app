@@ -39,17 +39,19 @@ pipeline {
         sh '''
         cd taskFlow
 
-        # Faster install
-        npm ci --prefer-offline --no-audit
+echo "STEP 1: npm ci"
+npm ci --prefer-offline --no-audit
 
-        # Optimized Angular tests for CI
-        npm run test -- \
-          --watch=false \
-          --code-coverage \
-          --browsers=ChromeHeadlessNoSandbox \
-          --source-map=false \
-          --progress=false \
-          --max-workers=2
+echo "STEP 2: running tests"
+npm run test -- \
+  --watch=false \
+  --code-coverage \
+  --browsers=ChromeHeadlessNoSandbox \
+  --source-map=false \
+  --progress=true \
+  --max-workers=2
+
+echo "STEP 3: done"
         '''
     }
 }
