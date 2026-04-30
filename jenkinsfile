@@ -32,34 +32,38 @@ pipeline {
                 }
 
                 stage('Frontend Tests') {
+    options {
+        timeout(time: 5, unit: 'MINUTES')
+    }
     environment {
         CHROME_BIN = '/usr/bin/chromium'
+        // Prevent Puppeteer from downloading Chrome during npm ci
+        PUPPETEER_SKIP_DOWNLOAD = 'true'
+        PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = 'true'
+        // Prevent Cypress from downloading binary
+        CYPRESS_INSTALL_BINARY = '0'
     }
     steps {
         sh '''
         cd taskFlow
 
-echo "STEP 1: npm ci"
-npm ci --prefer-offline --no-audit
+        echo "STEP 1: npm ci"
+        npm ci --prefer-offline --no-audit --foreground-scripts
+        echo "EXIT CODE: $?"
 
-echo "AFTER npm ci"
-echo "Exit code: $?"
+        echo "STEP 2: running tests"
+        npm run test -- \
+          --watch=false \
+          --code-coverage \
+          --browsers=ChromeHeadlessNoSandbox \
+          --source-map=false \
+          --progress=true \
+          --max-workers=2
 
-echo "STEP 2: running tests"
-npm run test -- \
-  --watch=false \
-  --code-coverage \
-  --browsers=ChromeHeadlessNoSandbox \
-  --source-map=false \
-  --progress=true \
-  --max-workers=2
-
-echo "STEP 3: done"
+        echo "STEP 3: done"
         '''
     }
-}
-            }
-        }
+}        }
 
         // SONAR ANALYSIS IN PARALLEL
         stage('Sonar Analysis') {
