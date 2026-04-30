@@ -8,7 +8,7 @@ pipeline {
 
         DOCKER_IMAGE_BACK = 'todo-backend'
         DOCKER_IMAGE_FRONT = 'taskflow'
-        VERSION = "${BUILD_NUMBER}"   // simple versioning
+        VERSION = "${BUILD_NUMBER}"
     }
 
     options {
@@ -17,7 +17,9 @@ pipeline {
 
     stages {
 
-        //  TESTS IN PARALLEL
+        // =========================
+        // TESTS IN PARALLEL
+        // =========================
         stage('Tests') {
             parallel {
 
@@ -32,40 +34,39 @@ pipeline {
                 }
 
                 stage('Frontend Tests') {
-    options {
-        timeout(time: 5, unit: 'MINUTES')
-    }
-    environment {
-        CHROME_BIN = '/usr/bin/chromium'
-        // Prevent Puppeteer from downloading Chrome during npm ci
-        PUPPETEER_SKIP_DOWNLOAD = 'true'
-        PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = 'true'
-        // Prevent Cypress from downloading binary
-        CYPRESS_INSTALL_BINARY = '0'
-    }
-    steps {
-        sh '''
-        cd taskFlow
+                    steps {
+                        timeout(time: 5, unit: 'MINUTES') {
+                            withEnv([
+                                'CHROME_BIN=/usr/bin/chromium',
+                                'PUPPETEER_SKIP_DOWNLOAD=true',
+                                'PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true',
+                                'CYPRESS_INSTALL_BINARY=0'
+                            ]) {
+                                sh '''
+                                cd taskFlow
 
-        echo "STEP 1: npm ci"
-        npm ci --prefer-offline --no-audit --foreground-scripts
-        echo "EXIT CODE: $?"
+                                npm ci --prefer-offline --no-audit --foreground-scripts
 
-        echo "STEP 2: running tests"
-        npm run test -- \
-          --watch=false \
-          --code-coverage \
-          --browsers=ChromeHeadlessNoSandbox \
-          --source-map=false \
-          --progress=true \
-          --max-workers=2
+                                npm run test -- \
+                                  --watch=false \
+                                  --code-coverage \
+                                  --browsers=ChromeHeadlessNoSandbox \
+                                  --source-map=false \
+                                  --progress=true \
+                                  --max-workers=2
+                                '''
+                            }
+                        }
+                    }
+                }
 
-        echo "STEP 3: done"
-        '''
-    }
-}        }
+            } // ✅ CLOSE parallel
+        } // ✅ CLOSE Tests stage
 
-        // SONAR ANALYSIS IN PARALLEL
+
+        // =========================
+        // SONAR ANALYSIS
+        // =========================
         stage('Sonar Analysis') {
             parallel {
 
@@ -96,20 +97,24 @@ pipeline {
                 }
             }
         }
+
+        // =========================
         // BUILD DOCKER IMAGES
+        // =========================
         stage('Build Docker Images') {
             steps {
                 sh '''
                 docker compose -f $COMPOSE_FILE build
 
-                # Tag with version
                 docker tag backend:1.0 $DOCKER_IMAGE_BACK:$VERSION
                 docker tag taskflow:1.0 $DOCKER_IMAGE_FRONT:$VERSION
                 '''
             }
         }
 
-        //  PUSH TO DOCKER HUB
+        // =========================
+        // PUSH TO DOCKER HUB
+        // =========================
         stage('Push Images') {
             steps {
                 withCredentials([usernamePassword(
@@ -133,8 +138,11 @@ pipeline {
             }
         }
 
-        //  DEPLOY TO KUBERNETES
-       /* stage('Deploy') {
+        // =========================
+        // DEPLOY (optional)
+        // =========================
+        /*
+        stage('Deploy') {
             steps {
                 sh '''
                 echo "Deploying to Kubernetes..."
@@ -142,14 +150,14 @@ pipeline {
                 kubectl apply -f k8s/namespace.yml
                 kubectl apply -f k8s/ -n task-flow
 
-                # Wait for rollout
                 kubectl rollout status deployment/backend -n task-flow
                 kubectl rollout status deployment/frontend -n task-flow
 
                 echo "Deployment successful"
                 '''
             }
-        }*/
+        }
+        */
     }
 
     post {
