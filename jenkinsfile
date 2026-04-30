@@ -115,7 +115,7 @@ pipeline {
         }
 
         //  DEPLOY TO KUBERNETES
-        stage('Deploy') {
+       /* stage('Deploy') {
             steps {
                 sh '''
                 echo "Deploying to Kubernetes..."
@@ -130,7 +130,7 @@ pipeline {
                 echo "Deployment successful"
                 '''
             }
-        }
+        }*/
     }
 
     post {
