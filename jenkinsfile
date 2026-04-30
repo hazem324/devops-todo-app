@@ -42,6 +42,9 @@ pipeline {
 echo "STEP 1: npm ci"
 npm ci --prefer-offline --no-audit
 
+echo "AFTER npm ci"
+echo "Exit code: $?"
+
 echo "STEP 2: running tests"
 npm run test -- \
   --watch=false \
