@@ -32,17 +32,27 @@ pipeline {
                 }
 
                 stage('Frontend Tests') {
-                    environment {
-                        CHROME_BIN = '/usr/bin/chromium'
-                    }
-                    steps {
-                        sh '''
-                        cd taskFlow
-                        npm ci
-                        npm run test -- --watch=false --code-coverage
-                        '''
-                    }
-                }
+    environment {
+        CHROME_BIN = '/usr/bin/chromium'
+    }
+    steps {
+        sh '''
+        cd taskFlow
+
+        # Faster install
+        npm ci --prefer-offline --no-audit
+
+        # Optimized Angular tests for CI
+        npm run test -- \
+          --watch=false \
+          --code-coverage \
+          --browsers=ChromeHeadlessNoSandbox \
+          --source-map=false \
+          --progress=false \
+          --max-workers=2
+        '''
+    }
+}
             }
         }
 
