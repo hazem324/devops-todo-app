@@ -53,7 +53,7 @@ pipeline {
                                   --browsers=ChromeHeadlessNoSandbox \
                                   --source-map=false \
                                   --progress=true \
-                                  --max-workers=2
+                
                                 '''
                             }
                         }
