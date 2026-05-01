@@ -45,7 +45,7 @@ pipeline {
                                 sh '''
                                 cd taskFlow
 
-                                npm ci --prefer-offline --no-audit --foreground-scripts
+                                npm install
 
                                 npm run test -- \
                                   --watch=false \
