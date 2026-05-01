@@ -34,34 +34,30 @@ pipeline {
                 }
 
                 stage('Frontend Tests') {
-                    steps {
-                        timeout(time: 5, unit: 'MINUTES') {
-                            withEnv([
-                                'CHROME_BIN=/usr/bin/chromium',
-                                'PUPPETEER_SKIP_DOWNLOAD=true',
-                                'PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true',
-                                'CYPRESS_INSTALL_BINARY=0'
-                            ]) {
-                                sh '''
-                                cd taskFlow
+    steps {
+        timeout(time: 5, unit: 'MINUTES') {
+            withEnv([
+                'PUPPETEER_SKIP_DOWNLOAD=false'
+            ]) {
+                sh '''
+                cd taskFlow
 
-                                npm install
+                npm ci
 
-                                npm run test -- \
-                                  --watch=false \
-                                  --code-coverage \
-                                  --browsers=ChromeHeadlessNoSandbox \
-                                  --source-map=false \
-                                  --progress=true \
-                
-                                '''
-                            }
-                        }
-                    }
-                }
+                npm run test -- \
+                  --watch=false \
+                  --code-coverage \
+                  --browsers=ChromeHeadlessNoSandbox \
+                  --source-map=false \
+                  --progress=true
+                '''
+            }
+        }
+    }
+}
 
-            } // ✅ CLOSE parallel
-        } // ✅ CLOSE Tests stage
+            } 
+        } 
 
 
         // =========================
