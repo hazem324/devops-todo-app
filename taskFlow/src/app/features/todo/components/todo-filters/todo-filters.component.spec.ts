@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { TodoFiltersComponent } from './todo-filters.component';
 
@@ -8,7 +9,8 @@ describe('TodoFiltersComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TodoFiltersComponent]
+      declarations: [TodoFiltersComponent],
+      imports: [HttpClientTestingModule]
     })
     .compileComponents();
 

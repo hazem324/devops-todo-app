@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { TodoPageComponent } from './todo-page.component';
 
@@ -8,7 +9,8 @@ describe('TodoPageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TodoPageComponent]
+      declarations: [TodoPageComponent],
+      imports: [HttpClientTestingModule]
     })
     .compileComponents();
 
