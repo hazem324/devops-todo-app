@@ -16,6 +16,11 @@ describe('TodoItemComponent', () => {
 
     fixture = TestBed.createComponent(TodoItemComponent);
     component = fixture.componentInstance;
+
+    // FIX: todo is a required @Input() marked with !
+    // The template reads todo.completed on first detectChanges — must be set before
+    component.todo = { id: 1, title: 'Test task', completed: false, priority: 'LOW' };
+
     fixture.detectChanges();
   });
 
