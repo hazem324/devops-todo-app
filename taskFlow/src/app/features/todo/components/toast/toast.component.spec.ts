@@ -3,15 +3,16 @@ import { Subject } from 'rxjs';
 
 import { ToastComponent } from './toast.component';
 import { ToastService } from '../../../../services/toast.service';
+import { Toast } from '../../../../model/toast.model';  // ← import real type
 
 describe('ToastComponent', () => {
   let component: ToastComponent;
   let fixture: ComponentFixture<ToastComponent>;
-  let toastSubject: Subject<any>;
+  let toastSubject: Subject<Toast>;
   let toastServiceMock: jasmine.SpyObj<ToastService>;
 
   beforeEach(async () => {
-    toastSubject     = new Subject();
+    toastSubject     = new Subject<Toast>();
     toastServiceMock = jasmine.createSpyObj('ToastService', ['error', 'success', 'info'], {
       toast$: toastSubject.asObservable()
     });
@@ -41,7 +42,8 @@ describe('ToastComponent', () => {
   });
 
   it('should become visible when toast$ emits', () => {
-    const mockToast = { message: 'Hello', type: 'success' };
+    // ← typed as Toast so 'success' satisfies ToastType, not just string
+    const mockToast: Toast = { message: 'Hello', type: 'success' };
     toastSubject.next(mockToast);
     expect(component.visible).toBeTrue();
     expect(component.toast).toEqual(mockToast);
@@ -49,7 +51,7 @@ describe('ToastComponent', () => {
 
   it('should hide after 3 seconds', (done) => {
     jasmine.clock().install();
-    const mockToast = { message: 'Hello', type: 'success' };
+    const mockToast: Toast = { message: 'Hello', type: 'success' };
     toastSubject.next(mockToast);
     expect(component.visible).toBeTrue();
     jasmine.clock().tick(3001);

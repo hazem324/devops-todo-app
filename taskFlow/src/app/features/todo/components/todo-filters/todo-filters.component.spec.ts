@@ -4,6 +4,7 @@ import { of } from 'rxjs';
 
 import { TodoFiltersComponent } from './todo-filters.component';
 import { TodoService } from '../../../../services/todo.service';
+import { Todo } from '../../../../model/todo.model';  // ← import real type
 
 describe('TodoFiltersComponent', () => {
   let component: TodoFiltersComponent;
@@ -45,7 +46,7 @@ describe('TodoFiltersComponent', () => {
   });
 
   it('should emit filteredResults on all filter', () => {
-    const todos = [{ id: 1, title: 'T', completed: false, priority: 'LOW' }];
+    const todos: Todo[] = [{ id: 1, title: 'T', completed: false, priority: 'LOW' }];
     spyOn(todoService, 'getAllTodos').and.returnValue(of(todos));
     spyOn(component.filteredResults, 'emit');
     component.onFilterClick('all');

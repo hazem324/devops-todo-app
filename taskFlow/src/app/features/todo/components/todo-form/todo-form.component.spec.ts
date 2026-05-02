@@ -5,6 +5,7 @@ import { of, throwError } from 'rxjs';
 
 import { TodoFormComponent } from './todo-form.component';
 import { TodoService } from '../../../../services/todo.service';
+import { Todo } from '../../../../model/todo.model';  // ← import real type
 
 describe('TodoFormComponent', () => {
   let component: TodoFormComponent;
@@ -54,9 +55,8 @@ describe('TodoFormComponent', () => {
   it('should call createTodo with correct dto on valid submit', () => {
     component.title            = 'New Task';
     component.selectedPriority = 'HIGH';
-    spyOn(todoService, 'createTodo').and.returnValue(
-      of({ id: 1, title: 'New Task', completed: false, priority: 'HIGH' })
-    );
+    const created: Todo = { id: 1, title: 'New Task', completed: false, priority: 'HIGH' };
+    spyOn(todoService, 'createTodo').and.returnValue(of(created));
     component.submit();
     expect(todoService.createTodo).toHaveBeenCalledWith({
       title: 'New Task', completed: false, priority: 'HIGH'
@@ -64,7 +64,7 @@ describe('TodoFormComponent', () => {
   });
 
   it('should emit todoCreated after successful submit', () => {
-    const created = { id: 1, title: 'New Task', completed: false, priority: 'LOW' };
+    const created: Todo = { id: 1, title: 'New Task', completed: false, priority: 'LOW' };
     component.title = 'New Task';
     spyOn(todoService, 'createTodo').and.returnValue(of(created));
     spyOn(component.todoCreated, 'emit');
@@ -73,10 +73,9 @@ describe('TodoFormComponent', () => {
   });
 
   it('should reset title after successful submit', () => {
+    const created: Todo = { id: 1, title: 'New Task', completed: false, priority: 'LOW' };
     component.title = 'New Task';
-    spyOn(todoService, 'createTodo').and.returnValue(
-      of({ id: 1, title: 'New Task', completed: false, priority: 'LOW' })
-    );
+    spyOn(todoService, 'createTodo').and.returnValue(of(created));
     component.submit();
     expect(component.title).toBe('');
   });
