@@ -5,13 +5,15 @@ import { of } from 'rxjs';
 
 import { TodoPageComponent } from './todo-page.component';
 import { TodoService } from '../../../../services/todo.service';
+import { Todo } from '../../../../model/todo.model';  // ← import the real type
 
 describe('TodoPageComponent', () => {
   let component: TodoPageComponent;
   let fixture: ComponentFixture<TodoPageComponent>;
   let todoService: TodoService;
 
-  const mockTodos = [
+  // ← typed as Todo[] so 'HIGH' | 'LOW' | 'MEDIUM' are correctly inferred
+  const mockTodos: Todo[] = [
     { id: 1, title: 'Task A', completed: true,  priority: 'HIGH'   },
     { id: 2, title: 'Task B', completed: false, priority: 'LOW'    },
     { id: 3, title: 'Task C', completed: false, priority: 'MEDIUM' },
@@ -24,8 +26,8 @@ describe('TodoPageComponent', () => {
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
-    fixture   = TestBed.createComponent(TodoPageComponent);
-    component = fixture.componentInstance;
+    fixture     = TestBed.createComponent(TodoPageComponent);
+    component   = fixture.componentInstance;
     todoService = TestBed.inject(TodoService);
 
     spyOn(todoService, 'getAllTodos').and.returnValue(of(mockTodos));
@@ -84,21 +86,22 @@ describe('TodoPageComponent', () => {
   });
 
   it('should add new todo on onTodoCreated', () => {
-    const newTodo = { id: 4, title: 'New', completed: false, priority: 'LOW' };
+    const newTodo: Todo = { id: 4, title: 'New', completed: false, priority: 'LOW' };
     component.onTodoCreated(newTodo);
     expect(component.todos[0]).toEqual(newTodo);
     expect(component.todos.length).toBe(4);
   });
 
   it('should update todo on onTodoUpdated', () => {
-    const updated = { id: 1, title: 'Updated', completed: true, priority: 'HIGH' };
+    const updated: Todo = { id: 1, title: 'Updated', completed: true, priority: 'HIGH' };
     component.onTodoUpdated(updated);
     expect(component.todos.find(t => t.id === 1)?.title).toBe('Updated');
   });
 
   it('should clear editingId on onTodoUpdated', () => {
     component.editingId = 1;
-    component.onTodoUpdated({ id: 1, title: 'X', completed: false, priority: 'LOW' });
+    const updated: Todo = { id: 1, title: 'X', completed: false, priority: 'LOW' };
+    component.onTodoUpdated(updated);
     expect(component.editingId).toBeNull();
   });
 

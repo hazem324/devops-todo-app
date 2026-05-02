@@ -3,12 +3,14 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { TodoListComponent } from './todo-list.component';
+import { Todo } from '../../../../model/todo.model';  // ← import the real type
 
 describe('TodoListComponent', () => {
   let component: TodoListComponent;
   let fixture: ComponentFixture<TodoListComponent>;
 
-  const mockTodos = [
+  // ← typed as Todo[] so priority literals are correctly narrowed
+  const mockTodos: Todo[] = [
     { id: 1, title: 'Task A', completed: false, priority: 'LOW'  },
     { id: 2, title: 'Task B', completed: true,  priority: 'HIGH' },
   ];
@@ -17,7 +19,7 @@ describe('TodoListComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [TodoListComponent],
       imports: [HttpClientTestingModule],
-      schemas: [NO_ERRORS_SCHEMA]   // template renders app-todo-item children
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
     fixture   = TestBed.createComponent(TodoListComponent);

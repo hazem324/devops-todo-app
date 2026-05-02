@@ -4,13 +4,15 @@ import { of, throwError } from 'rxjs';
 
 import { TodoItemComponent } from './todo-item.component';
 import { TodoService } from '../../../../services/todo.service';
+import { Todo } from '../../../../model/todo.model';  // ← import the real type
 
 describe('TodoItemComponent', () => {
   let component: TodoItemComponent;
   let fixture: ComponentFixture<TodoItemComponent>;
   let todoService: TodoService;
 
-  const mockTodo = { id: 1, title: 'Test task', completed: false, priority: 'LOW' };
+  // ← typed as Todo so priority literals are correctly narrowed
+  const mockTodo: Todo = { id: 1, title: 'Test task', completed: false, priority: 'LOW' };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -30,13 +32,11 @@ describe('TodoItemComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  // ── paddedId ──────────────────────────────────────────────
   it('should return paddedId with leading zeros', () => {
     component.todo = { ...mockTodo, id: 5 };
     expect(component.paddedId).toBe('005');
   });
 
-  // ── priorityClass ─────────────────────────────────────────
   it('should return correct priorityClass for LOW', () => {
     component.todo = { ...mockTodo, priority: 'LOW' };
     expect(component.priorityClass).toBe('priority-low');
@@ -47,7 +47,6 @@ describe('TodoItemComponent', () => {
     expect(component.priorityClass).toBe('priority-high');
   });
 
-  // ── badgeClass ────────────────────────────────────────────
   it('should return correct badgeClass for MEDIUM', () => {
     component.todo = { ...mockTodo, priority: 'MEDIUM' };
     expect(component.badgeClass).toBe('tag-medium');
@@ -65,7 +64,7 @@ describe('TodoItemComponent', () => {
 
   it('should emit todoUpdated after marking as completed', () => {
     component.todo = { ...mockTodo, completed: false };
-    const updated = { ...mockTodo, completed: true };
+    const updated: Todo = { ...mockTodo, completed: true };
     spyOn(todoService, 'markAsCompleted').and.returnValue(of(updated));
     spyOn(component.todoUpdated, 'emit');
     component.onToggle();
@@ -84,7 +83,7 @@ describe('TodoItemComponent', () => {
 
   it('should emit todoUpdated after marking as pending', () => {
     component.todo = { ...mockTodo, completed: true };
-    const updated = { ...mockTodo, completed: false };
+    const updated: Todo = { ...mockTodo, completed: false };
     spyOn(todoService, 'updateTodo').and.returnValue(of(updated));
     spyOn(component.todoUpdated, 'emit');
     component.onToggle();
@@ -107,7 +106,7 @@ describe('TodoItemComponent', () => {
   });
 
   it('should emit todoUpdated after save', () => {
-    const updated = { ...mockTodo, title: 'Updated' };
+    const updated: Todo = { ...mockTodo, title: 'Updated' };
     spyOn(todoService, 'updateTodo').and.returnValue(of(updated));
     spyOn(component.todoUpdated, 'emit');
     component.onSave('Updated');
