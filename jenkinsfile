@@ -79,18 +79,25 @@ pipeline {
                 }
 
                 stage('Frontend Sonar') {
-                    steps {
-                        sh '''
-                        cd taskFlow
-                        npx sonar-scanner \
-                          -Dsonar.projectKey=todo-frontend \
-                          -Dsonar.sources=src \
-                          -Dsonar.host.url=$SONAR_HOST \
-                          -Dsonar.login=$SONAR_TOKEN \
-                          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-                        '''
-                    }
-                }
+    steps {
+        sh '''
+        cd taskFlow
+        npx sonar-scanner \
+          -Dsonar.projectKey=todo-frontend \
+          -Dsonar.sources=src \
+          -Dsonar.host.url=$SONAR_HOST \
+          -Dsonar.login=$SONAR_TOKEN \
+          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+          -Dsonar.coverage.exclusions=\
+"**/model/**,\
+**/environments/**,\
+**/*.module.ts,\
+**/*-routing.module.ts,\
+**/main.ts,\
+**/polyfills.ts"
+        '''
+    }
+}
             }
         }
 
