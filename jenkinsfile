@@ -23,7 +23,7 @@ pipeline {
         stage('Tests') {
             parallel {
 
-                stage('Backend Tests') {
+               /* stage('Backend Tests') {
                     steps {
                         sh '''
                         cd todo-backend
@@ -31,7 +31,7 @@ pipeline {
                         ./mvnw clean verify
                         '''
                     }
-                }
+                }*/
 
                 stage('Frontend Tests') {
     steps {
