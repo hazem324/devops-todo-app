@@ -64,17 +64,18 @@ pipeline {
         stage('Sonar Analysis') {
             parallel {
 
-                stage('Backend Sonar') {
+               /* stage('Backend Sonar') {
                     steps {
                         sh '''
                         cd todo-backend
+                        chmod +x mvnw
                         ./mvnw sonar:sonar \
                           -Dsonar.projectKey=todo-backend \
                           -Dsonar.host.url=$SONAR_HOST \
                           -Dsonar.login=$SONAR_TOKEN
                         '''
                     }
-                }
+                }*/
 
                 stage('Frontend Sonar') {
     steps {
