@@ -35,21 +35,19 @@ pipeline {
 
                 stage('Frontend Tests') {
     steps {
-        timeout(time: 5, unit: 'MINUTES') {
-            withEnv([
-                'PUPPETEER_SKIP_DOWNLOAD=false'
-            ]) {
+        timeout(time: 20, unit: 'MINUTES') {
+            withEnv(['PUPPETEER_SKIP_DOWNLOAD=false']) {
                 sh '''
                 cd taskFlow
 
-                npm ci
+                npm ci --prefer-offline --no-audit --progress=false
 
                 npm run test -- \
                   --watch=false \
                   --code-coverage \
                   --browsers=ChromeHeadlessNoSandbox \
                   --source-map=false \
-                  --progress=true
+                  --progress=false
                 '''
             }
         }
