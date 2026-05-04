@@ -82,17 +82,19 @@ pipeline {
         sh '''
         cd taskFlow
 
-        # Fix LCOV paths
-        sed -i 's|SF:src|SF:/var/jenkins_home/workspace/fullstack-ci-cd-pipeline@2/taskFlow/src|g' coverage/lcov.info
+        # Fix LCOV paths dynamically
+        sed -i "s|SF:src|SF:${WORKSPACE}/taskFlow/src|g" coverage/lcov.info
 
         npx sonar-scanner \
           -Dsonar.projectKey=todo-frontend \
           -Dsonar.sources=src \
           -Dsonar.tests=src \
+          -Dsonar.test.inclusions=**/*.spec.ts \
+          -Dsonar.exclusions=**/*.spec.ts \
           -Dsonar.host.url=$SONAR_HOST \
           -Dsonar.login=$SONAR_TOKEN \
           -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info \
-          -Dsonar.coverage.exclusions=**/*.spec.ts
+          -Dsonar.sourceEncoding=UTF-8
         '''
     }
 }
