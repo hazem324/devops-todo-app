@@ -13,6 +13,7 @@ pipeline {
 
     options {
         timestamps()
+        disableConcurrentBuilds()
     }
 
     stages {
@@ -34,29 +35,27 @@ pipeline {
                 }
 
                 stage('Frontend Tests') {
-    steps {
-        timeout(time: 20, unit: 'MINUTES') {
-            withEnv(['PUPPETEER_SKIP_DOWNLOAD=false']) {
-                sh '''
-                cd taskFlow
+                    steps {
+                        timeout(time: 20, unit: 'MINUTES') {
+                            withEnv(['PUPPETEER_SKIP_DOWNLOAD=false']) {
+                                sh '''
+                                cd taskFlow
 
-                npm ci --prefer-offline --no-audit --progress=false
+                                npm ci --prefer-offline --no-audit --progress=false
 
-                npm run test -- \
-                  --watch=false \
-                  --code-coverage \
-                  --browsers=ChromeHeadlessNoSandbox \
-                  --source-map=false \
-                  --progress=false
-                '''
-            }
-        }
-    }
-}
-
+                                npm run test -- \
+                                  --watch=false \
+                                  --code-coverage \
+                                  --browsers=ChromeHeadlessNoSandbox \
+                                  --source-map=false \
+                                  --progress=false
+                                '''
+                            }
+                        }
+                    }
+                }
             } 
         } 
-
 
         // =========================
         // SONAR ANALYSIS
@@ -78,26 +77,26 @@ pipeline {
                 }
 
                 stage('Frontend Sonar') {
-    steps {
-        sh '''
-        cd taskFlow
+                    steps {
+                        sh '''
+                        cd taskFlow
 
-        # Fix LCOV paths dynamically
-        sed -i "s|SF:src|SF:${WORKSPACE}/taskFlow/src|g" coverage/lcov.info
+                        # Fix LCOV paths
+                        sed -i "s|SF:src|SF:${WORKSPACE}/taskFlow/src|g" coverage/lcov.info
 
-        npx sonar-scanner \
-          -Dsonar.projectKey=todo-frontend \
-          -Dsonar.sources=src \
-          -Dsonar.tests=src \
-          -Dsonar.test.inclusions=**/*.spec.ts \
-          -Dsonar.exclusions=**/*.spec.ts \
-          -Dsonar.host.url=$SONAR_HOST \
-          -Dsonar.login=$SONAR_TOKEN \
-          -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info \
-          -Dsonar.sourceEncoding=UTF-8
-        '''
-    }
-}
+                        npx sonar-scanner \
+                          -Dsonar.projectKey=todo-frontend \
+                          -Dsonar.sources=src \
+                          -Dsonar.tests=src \
+                          -Dsonar.test.inclusions=**/*.spec.ts \
+                          -Dsonar.exclusions=**/*.spec.ts \
+                          -Dsonar.host.url=$SONAR_HOST \
+                          -Dsonar.login=$SONAR_TOKEN \
+                          -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info \
+                          -Dsonar.sourceEncoding=UTF-8
+                        '''
+                    }
+                }
             }
         }
 
@@ -109,8 +108,9 @@ pipeline {
                 sh '''
                 docker compose -f $COMPOSE_FILE build
 
-                docker tag backend:1.0 $DOCKER_IMAGE_BACK:$VERSION
-                docker tag taskflow:1.0 $DOCKER_IMAGE_FRONT:$VERSION
+                # FIXED TAGS
+                docker tag todo-backend:latest $DOCKER_IMAGE_BACK:$VERSION
+                docker tag taskflow:latest $DOCKER_IMAGE_FRONT:$VERSION
                 '''
             }
         }
@@ -142,20 +142,38 @@ pipeline {
         }
 
         // =========================
-        // DEPLOY (optional)
+        // DEPLOY TO KUBERNETES
         // =========================
         stage('Deploy') {
             steps {
                 sh '''
-                echo "Deploying to Kubernetes..."
+                echo "🚀 Deploying to Kubernetes..."
 
-                kubectl apply -f k8s/namespace.yml
+                # Ensure namespace exists
+                kubectl get ns task-flow || kubectl create ns task-flow
+
+                # Apply all manifests
                 kubectl apply -f k8s/ -n task-flow
 
-                kubectl rollout status deployment/backend -n task-flow
-                kubectl rollout status deployment/frontend -n task-flow
+                echo "⏳ Waiting for database..."
+                kubectl rollout status deployment/taskflow-db -n task-flow --timeout=120s
 
-                echo "Deployment successful"
+                echo "⏳ Waiting for backend..."
+                kubectl rollout status deployment/backend -n task-flow --timeout=120s
+
+                echo "⏳ Waiting for frontend..."
+                kubectl rollout status deployment/frontend -n task-flow --timeout=120s
+
+                echo "📦 Checking pods status..."
+                kubectl get pods -n task-flow
+
+                # FAIL PIPELINE IF SOMETHING IS WRONG
+                if kubectl get pods -n task-flow | grep -E 'Pending|CrashLoopBackOff'; then
+                  echo "❌ Deployment failed"
+                  exit 1
+                fi
+
+                echo "✅ Deployment successful"
                 '''
             }
         }
@@ -167,11 +185,11 @@ pipeline {
         }
 
         success {
-            echo " Pipeline SUCCESS"
+            echo "🎉 Pipeline SUCCESS"
         }
 
         failure {
-            echo " Pipeline FAILED"
+            echo "❌ Pipeline FAILED"
         }
     }
 }
