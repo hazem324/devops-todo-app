@@ -108,9 +108,8 @@ pipeline {
                 sh '''
                 docker compose -f $COMPOSE_FILE build
 
-                # FIXED TAGS
-                docker tag todo-backend:latest $DOCKER_IMAGE_BACK:$VERSION
-                docker tag taskflow:latest $DOCKER_IMAGE_FRONT:$VERSION
+                docker tag backend:1.0 $DOCKER_IMAGE_BACK:$VERSION
+                docker tag taskflow:1.0 $DOCKER_IMAGE_FRONT:$VERSION
                 '''
             }
         }
