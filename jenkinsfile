@@ -23,7 +23,7 @@ pipeline {
         stage('Tests') {
             parallel {
 
-               /* stage('Backend Tests') {
+                stage('Backend Tests') {
                     steps {
                         sh '''
                         cd todo-backend
@@ -31,7 +31,7 @@ pipeline {
                         ./mvnw clean verify
                         '''
                     }
-                }*/
+                }
 
                 stage('Frontend Tests') {
     steps {
@@ -64,7 +64,7 @@ pipeline {
         stage('Sonar Analysis') {
             parallel {
 
-               /* stage('Backend Sonar') {
+                stage('Backend Sonar') {
                     steps {
                         sh '''
                         cd todo-backend
@@ -75,7 +75,7 @@ pipeline {
                           -Dsonar.login=$SONAR_TOKEN
                         '''
                     }
-                }*/
+                }
 
                 stage('Frontend Sonar') {
     steps {
@@ -104,7 +104,7 @@ pipeline {
         // =========================
         // BUILD DOCKER IMAGES
         // =========================
-        /*stage('Build Docker Images') {
+        stage('Build Docker Images') {
             steps {
                 sh '''
                 docker compose -f $COMPOSE_FILE build
@@ -113,12 +113,12 @@ pipeline {
                 docker tag taskflow:1.0 $DOCKER_IMAGE_FRONT:$VERSION
                 '''
             }
-        }*/
+        }
 
         // =========================
         // PUSH TO DOCKER HUB
         // =========================
-       /* stage('Push Images') {
+        stage('Push Images') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'docker-hub',
@@ -139,12 +139,11 @@ pipeline {
                     '''
                 }
             }
-        }*/
+        }
 
         // =========================
         // DEPLOY (optional)
         // =========================
-        /*
         stage('Deploy') {
             steps {
                 sh '''
@@ -160,7 +159,6 @@ pipeline {
                 '''
             }
         }
-        */
     }
 
     post {
