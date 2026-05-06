@@ -18,9 +18,7 @@ pipeline {
 
     stages {
 
-        // =========================
         // TESTS IN PARALLEL
-        // =========================
         stage('Tests') {
             parallel {
 
@@ -57,9 +55,7 @@ pipeline {
             } 
         } 
 
-        // =========================
         // SONAR ANALYSIS
-        // =========================
         stage('Sonar Analysis') {
             parallel {
 
@@ -100,9 +96,7 @@ pipeline {
             }
         }
 
-        // =========================
         // BUILD DOCKER IMAGES
-        // =========================
         stage('Build Docker Images') {
             steps {
                 sh '''
@@ -114,9 +108,7 @@ pipeline {
             }
         }
 
-        // =========================
         // PUSH TO DOCKER HUB
-        // =========================
         stage('Push Images') {
             steps {
                 withCredentials([usernamePassword(
@@ -140,13 +132,11 @@ pipeline {
             }
         }
 
-        // =========================
         // DEPLOY TO KUBERNETES
-        // =========================
         stage('Deploy') {
             steps {
                 sh '''
-                echo "🚀 Deploying to Kubernetes..."
+                echo " Deploying to Kubernetes..."
 
                 # Ensure namespace exists
                 kubectl get ns task-flow || kubectl create ns task-flow
@@ -154,25 +144,25 @@ pipeline {
                 # Apply all manifests
                 kubectl apply -f k8s/ -n task-flow
 
-                echo "⏳ Waiting for database..."
+                echo "Waiting for database..."
                 kubectl rollout status deployment/taskflow-db -n task-flow --timeout=120s
 
-                echo "⏳ Waiting for backend..."
+                echo " Waiting for backend..."
                 kubectl rollout status deployment/backend -n task-flow --timeout=120s
 
-                echo "⏳ Waiting for frontend..."
+                echo " Waiting for frontend..."
                 kubectl rollout status deployment/frontend -n task-flow --timeout=120s
 
-                echo "📦 Checking pods status..."
+                echo " Checking pods status..."
                 kubectl get pods -n task-flow
 
                 # FAIL PIPELINE IF SOMETHING IS WRONG
                 if kubectl get pods -n task-flow | grep -E 'Pending|CrashLoopBackOff'; then
-                  echo "❌ Deployment failed"
+                  echo " Deployment failed"
                   exit 1
                 fi
 
-                echo "✅ Deployment successful"
+                echo " Deployment successful"
                 '''
             }
         }
@@ -184,11 +174,11 @@ pipeline {
         }
 
         success {
-            echo "🎉 Pipeline SUCCESS"
+            echo "Pipeline SUCCESS"
         }
 
         failure {
-            echo "❌ Pipeline FAILED"
+            echo "Pipeline FAILED"
         }
     }
 }
