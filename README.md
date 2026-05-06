@@ -236,11 +236,142 @@ Developed as part of a DevOps & Full Stack project.
 
 ---
 
-##  Future Improvements
+# 🧠 Good to Know: Kubernetes Storage (PV & PVC)
 
-*  JWT Authentication (Spring Security)
-*  Monitoring (Prometheus + Grafana)
-*  Cloud deployment (AWS / Azure)
-*  Kubernetes auto-scaling
+##  How Storage Works in This Project
+
+This project uses **Kubernetes Persistent Volumes (PV)** and **Persistent Volume Claims (PVC)** to ensure that database data is not lost when pods restart.
+
+###  Storage Flow
+
+```
+Pod (MySQL)
+   ↓
+PersistentVolumeClaim (PVC)
+   ↓
+PersistentVolume (PV)
+   ↓
+Host Disk (/mnt/data/mysql)
+```
+
+---
+
+##  Components Explained
+
+###  PersistentVolume (PV)
+
+* Represents actual storage in the cluster
+* In this project, it uses a local path:
+
+```yaml
+hostPath:
+  path: /mnt/data/mysql
+```
+
+ This means data is physically stored on the node where Minikube is running.
+
+---
+
+###  PersistentVolumeClaim (PVC)
+
+* A request for storage made by a pod
+* Automatically binds to a matching PV
+
+ The MySQL pod uses the PVC to access storage without knowing where it is physically located.
+
+---
+
+###  Pod (MySQL)
+
+* Uses the PVC to read/write data
+* Data is stored persistently on disk via the PV
+
+---
+
+##  Key Concept
+
+ PV does NOT store data
+ PVC does NOT store data
+ Data is stored on the underlying disk
+
+ PV → points to storage
+ PVC → requests storage
+ Pod → uses PVC to access storage
+
+---
+
+##  Why This Matters
+
+Without PV/PVC:
+
+```text
+Pod restart → Data lost 
+```
+
+With PV/PVC:
+
+```text
+Pod restart → Data preserved 
+```
+
+---
+
+##  Reclaim Policy 
+
+This project uses:
+
+```yaml
+persistentVolumeReclaimPolicy: Retain
+```
+
+ Meaning:
+
+* Data is **kept even if PVC is deleted**
+* Manual cleanup is required if the PV is reused
+
+---
+
+##  Important DevOps Practice
+
+ Storage resources should be created **once** and reused.
+
+```bash
+kubectl apply -f k8s
+```
+
+ Do NOT redeploy PV/PVC in every pipeline run
+ Separate storage from application deployments
+
+---
+
+##  Limitations 
+
+* Uses `hostPath` → suitable for **local development only**
+* Not recommended for production
+
+---
+
+#  Summary
+
+| Component | Role                   |
+| --------- | ---------------------- |
+| PV        | Points to real storage |
+| PVC       | Requests storage       |
+| Pod       | Uses storage           |
+| Disk      | Stores actual data     |
+
+---
+
+#  Bonus Insight
+
+This setup helped solve a real-world issue:
+
+>  PV stuck in `Released` state → PVC could not bind → DB failed
+
+Which reinforces the importance of:
+
+ Proper storage lifecycle management
+ Separating infrastructure from deployment
+
 
 ---
